@@ -146,6 +146,12 @@
     <ClCompile Include="findPID.cpp" />
     <ClCompile Include="load.cpp" />
     <ClCompile Include="sysopen.c" />
+    <ClCompile Include="ApiResolver.cpp" />
+    <ClCompile Include="Crypto.cpp" />
+    <ClCompile Include="Memory.cpp" />
+    <ClCompile Include="AntiDebug.cpp" />
+    <ClCompile Include="Injection.cpp" />
+    <ClCompile Include="Stealth.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="connector.h" />

