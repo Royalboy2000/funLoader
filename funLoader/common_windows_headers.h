@@ -1,68 +1,65 @@
 #pragma once
 
-// Define appropriate _WIN32_WINNT version if specific API levels are needed.
-// For broad compatibility, let Windows.h use its default or rely on project settings.
-// Example: #define _WIN32_WINNT _WIN32_WINNT_WIN7
+// Define WIN32_LEAN_AND_MEAN to reduce header size and potential conflicts.
+#ifndef WIN32_LEAN_AND_MEAN
+#define WIN32_LEAN_AND_MEAN
+#endif
 
-// It's often best to avoid WIN32_LEAN_AND_MEAN for projects like this
-// that use many parts of the Windows API, including less common NT structures,
-// unless you are very sure about what it excludes and that you don't need it.
-// If it was defined globally in project settings, it could be a source of issues.
-// #undef WIN32_LEAN_AND_MEAN
+// Define a common target version for Windows API.
+#ifndef _WIN32_WINNT
+#define _WIN32_WINNT 0x0601 // Windows 7 or later
+#endif
 
-#include <windows.h>
+#include <windows.h>  // Now lean due to WIN32_LEAN_AND_MEAN
 
-// After windows.h, we can include other specific headers if absolutely necessary
-// and if windows.h doesn't reliably include them for all configurations,
-// or if a specific version of a struct/API from a more direct header is needed.
-// For now, relying on windows.h to bring in ntdef.h, winnt.h, winternl.h, ntstatus.h.
+// After a lean windows.h, explicitly include headers for NT structures and types.
+// ntdef.h provides many basic NT types (NTSTATUS, PVOID, HANDLE, UNICODE_STRING, OBJECT_ATTRIBUTES, LIST_ENTRY etc.)
+// and is often a prerequisite for winternl.h.
+#include <ntdef.h>
 
-// For NTSTATUS values, ntstatus.h is sometimes not fully pulled in by windows.h
-// depending on SDK configuration or other defines. Including it explicitly
-// after windows.h (which defines _NTDEF_ etc.) is generally safe.
-#include <ntstatus.h> // For NTSTATUS values like STATUS_SUCCESS, etc.
+// winternl.h provides PEB, LDR_DATA_TABLE_ENTRY, THREADINFOCLASS, more OBJECT_ATTRIBUTES details,
+// and many Nt* function prototypes (though we declare our own in sysopen.h for direct syscalls).
+#include <winternl.h>
 
-// Ensure common NTAPI types like POBJECT_ATTRIBUTES, THREADINFOCLASS, etc.
-// are available. These are typically in winnt.h or winternl.h, included by windows.h.
-// If errors persist for these types, specific sub-headers of windows.h might need
-// to be explicitly included here, e.g. <winternl.h>, but this should be a last resort
-// as <windows.h> is supposed to manage this.
+// ntstatus.h for NTSTATUS values (like STATUS_SUCCESS, STATUS_WAIT_0 etc.).
+// With WIN32_LEAN_AND_MEAN, windows.h/winnt.h should define fewer STATUS_* codes,
+// making ntstatus.h the primary source, hopefully avoiding C4005 redefinition warnings.
+#include <ntstatus.h>
 
-// For PEB/LDR structures, <winternl.h> is the source. <windows.h> should include it.
-// If LDR_DATA_TABLE_ENTRY fields are still missing, an explicit <winternl.h> here might be forced.
-
-// Add any other globally needed system headers here.
-// For example, for CreateToolhelp32Snapshot:
+// Other common system headers
 #include <TlHelp32.h> // For CreateToolhelp32Snapshot, THREADENTRY32, etc.
 
-// For C++ standard library types used commonly across the project:
+// For __readgsqword and other intrinsics (MSVC specific)
+#if defined(_MSC_VER)
+#include <intrin.h>
+#endif
+
+// C++ Standard Library headers (guard for C compatibility if this header were ever included by a .c file directly)
+#ifdef __cplusplus
 #include <vector>
 #include <string>
 #include <map>
 #include <algorithm> // For std::transform
 #include <random>    // For std::mt19937 and std::uniform_int_distribution
-#include <time.h>      // For seeding random number generator (though <random> is better)
-// #include <iostream> // Only if widespread console debugging is needed, better to keep in .cpp
+#include <time.h>      // For seeding random number generator (used in Memory.cpp)
+// #include <iostream> // Only if widespread console debugging is needed and included by .cpp files directly
+#endif
 
-// Ensure NT_SUCCESS macro is available. It's usually in ntdef.h (via windows.h)
-// but can be defined if missing.
+// Common project-specific macro definitions (e.g., NT_SUCCESS)
+// NT_SUCCESS is usually in ntdef.h or winnt.h (via windows.h), but to be safe:
 #ifndef NT_SUCCESS
 #define NT_SUCCESS(Status) (((NTSTATUS)(Status)) >= 0)
 #endif
 
-// Common status codes that might not always be defined by default includes
+// Specific STATUS_ codes can be defined here with #ifndef if ntstatus.h doesn't cover them
+// or if ntstatus.h is conditionally excluded in some builds.
+// For now, relying on ntstatus.h to provide these.
+/*
 #ifndef STATUS_SUCCESS
-#define STATUS_SUCCESS ((NTSTATUS)0x00000000L)
+#define STATUS_SUCCESS                   ((NTSTATUS)0x00000000L)
 #endif
-
+// Add other custom status code defines here if needed, for example:
 #ifndef STATUS_INFO_LENGTH_MISMATCH
-#define STATUS_INFO_LENGTH_MISMATCH ((NTSTATUS)0xC0000004L)
+#define STATUS_INFO_LENGTH_MISMATCH      ((NTSTATUS)0xC0000004L)
 #endif
-
-#ifndef STATUS_BUFFER_TOO_SMALL
-#define STATUS_BUFFER_TOO_SMALL ((NTSTATUS)0xC0000023L)
-#endif
-
-#ifndef STATUS_UNSUCCESSFUL
-#define STATUS_UNSUCCESSFUL ((NTSTATUS)0xC0000001L)
-#endif
+*/
