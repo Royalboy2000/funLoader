@@ -8,6 +8,33 @@
 
 #include <windows.h>
 
+// Define THREADINFOCLASS here if not using the one from AntiDebug.h for some reason
+// For ThreadHideFromDebugger (usually value 0x11)
+#ifndef THREADINFOCLASS_DEFINED
+#define THREADINFOCLASS_DEFINED
+typedef enum _THREADINFOCLASS_SYS { // Renamed to avoid conflict if AntiDebug.h is also included by user of sysopen.h
+    ThreadBasicInformation_s,
+    ThreadTimes_s,
+    ThreadPriority_s,
+    ThreadBasePriority_s,
+    ThreadAffinityMask_s,
+    ThreadImpersonationToken_s,
+    ThreadDescriptorTableEntry_s,
+    ThreadEnableAlignmentFaultFixup_s,
+    ThreadEventPair_Reusable_s,
+    ThreadQuerySetWin32StartAddress_s,
+    ThreadZeroTlsCell_s,
+    ThreadPerformanceCount_s,
+    ThreadAmILastThread_s,
+    ThreadIdealProcessor_s,
+    ThreadPriorityBoost_s,
+    ThreadSetTlsArrayAddress_s,
+    ThreadIsIoPending_s,
+    ThreadHideFromDebugger_s = 0x11
+} THREADINFOCLASS_SYS;
+#endif
+
+
 #define SW2_SEED 0xD756B6EA
 #define SW2_ROL8(v) (v << 8 | v >> 24)
 #define SW2_ROR8(v) (v >> 8 | v << 24)
@@ -152,5 +179,35 @@ EXTERN_C NTSTATUS NtOpenProcess(
 	IN ACCESS_MASK DesiredAccess,
 	IN POBJECT_ATTRIBUTES ObjectAttributes,
 	IN PCLIENT_ID ClientId OPTIONAL);
+
+EXTERN_C NTSTATUS NtProtectVirtualMemory(
+    IN HANDLE ProcessHandle,
+    IN OUT PVOID* BaseAddress,
+    IN OUT PSIZE_T RegionSize,
+    IN ULONG NewProtect,
+    OUT PULONG OldProtect
+    );
+
+EXTERN_C NTSTATUS NtSetInformationThread(
+    IN HANDLE ThreadHandle,
+    IN THREADINFOCLASS_SYS ThreadInformationClass, // Use the renamed enum
+    IN PVOID ThreadInformation,
+    IN ULONG ThreadInformationLength
+    );
+
+// Add NtUnmapViewOfSection for Stealth::UnmapSelf (conceptual)
+// EXTERN_C NTSTATUS NtUnmapViewOfSection(
+//     IN HANDLE ProcessHandle,
+//     IN PVOID BaseAddress OPTIONAL
+//     );
+
+// Add NtFreeVirtualMemory for Memory::RandomAlloc cleanup path (if not using NtUnmapViewOfSection for reserved blocks)
+EXTERN_C NTSTATUS NtFreeVirtualMemory(
+    IN HANDLE ProcessHandle,
+    IN PVOID *BaseAddress,
+    IN OUT PSIZE_T RegionSize,
+    IN ULONG FreeType
+    );
+
 
 #endif
