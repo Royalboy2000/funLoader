@@ -1,5 +1,6 @@
 #include "common_windows_headers.h" // Should be first for system types
 #include <winternl.h>               // Explicitly include for NT types/functions
+#include <winioctl.h>               // For DISK_GEOMETRY, IOCTL_DISK_GET_DRIVE_GEOMETRY
 
 #include <stdio.h> // For printf, if kept for debugging
 #include "connector.h"

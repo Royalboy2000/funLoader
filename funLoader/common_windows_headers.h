@@ -10,16 +10,23 @@
 #define _WIN32_WINNT 0x0601 // Windows 7 or later; adjust as needed
 #endif
 
-#include <windows.h>  // Now lean due to WIN32_LEAN_AND_MEAN. Should include essential parts of winnt.h and ntdef.h content.
+#include <windows.h>  // Now lean due to WIN32_LEAN_AND_MEAN.
 
-// After a lean windows.h, explicitly include winternl.h for detailed NT structures.
-// ntdef.h is typically included by winternl.h or windows.h, so direct include of ntdef.h is removed
-// to let the main headers manage its inclusion and avoid redefinition conflicts with winnt.h.
-#include <winternl.h> // For PEB, LDR_DATA_TABLE_ENTRY, OBJECT_ATTRIBUTES, THREADINFOCLASS etc.
+// After a lean windows.h, explicitly include headers for NT structures and types.
+// ntdef.h provides many basic NT types and is often a prerequisite for winternl.h
+// It defines NTSTATUS, PVOID, HANDLE, ULONG, USHORT, UNICODE_STRING, OBJECT_ATTRIBUTES, LIST_ENTRY etc.
+#include <ntdef.h>
 
-// ntstatus.h for NTSTATUS values. With WIN32_LEAN_AND_MEAN, windows.h/winnt.h
-// should define fewer STATUS_* codes, making ntstatus.h the primary source,
-// hopefully avoiding C4005 redefinition warnings with winnt.h.
+// winternl.h provides PEB, LDR_DATA_TABLE_ENTRY, THREADINFOCLASS, more OBJECT_ATTRIBUTES details,
+// and many Nt* function prototypes.
+#include <winternl.h>
+
+// ntpsapi.h for PPS_ATTRIBUTE_LIST and other process/thread attribute types.
+#include <ntpsapi.h>
+
+// ntstatus.h for NTSTATUS values (like STATUS_SUCCESS, STATUS_WAIT_0 etc.).
+// With WIN32_LEAN_AND_MEAN, windows.h/winnt.h might define fewer STATUS_* codes,
+// making ntstatus.h the primary source, hopefully avoiding C4005 redefinition warnings.
 #include <ntstatus.h>
 
 // Other common system headers
@@ -30,7 +37,7 @@
 #include <intrin.h>
 #endif
 
-// C++ Standard Library headers (guard for C compatibility if this header were ever included by a .c file directly)
+// C++ Standard Library headers (guard for C compatibility)
 #ifdef __cplusplus
 #include <vector>
 #include <string>
@@ -38,11 +45,10 @@
 #include <algorithm> // For std::transform
 #include <random>    // For std::mt19937 and std::uniform_int_distribution
 #include <time.h>      // For seeding random number generator (used in Memory.cpp)
-// #include <iostream> // Only if widespread console debugging is needed and included by .cpp files directly
+// #include <iostream> // Only if widespread console debugging is needed
 #endif
 
 // Common project-specific macro definitions
-// NT_SUCCESS is usually in ntdef.h (via windows.h or winternl.h), but define if not.
 #ifndef NT_SUCCESS
 #define NT_SUCCESS(Status) (((NTSTATUS)(Status)) >= 0)
 #endif
