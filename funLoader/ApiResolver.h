@@ -1,9 +1,6 @@
 #pragma once
 
-#include <Windows.h>
-#include <vector>
-#include <string>
-#include <map>
+#include "common_windows_headers.h" // Centralized headers (includes Windows.h, vector, string, map)
 
 // Define a function pointer type for resolved functions
 typedef FARPROC (WINAPI *RESOLVED_FUNC)();

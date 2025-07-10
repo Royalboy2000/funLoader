@@ -1,6 +1,6 @@
-#include "AntiDebug.h"
-#include "sysopen.h" // For NtSetInformationThread (conceptually added)
-#include <winternl.h> // For NTSTATUS if not in sysopen.h
+#include "AntiDebug.h" // Includes common_windows_headers.h
+#include "sysopen.h"   // Includes common_windows_headers.h
+// <winternl.h> should be covered by common_windows_headers.h
 
 // Make sure NTSTATUS SUCCESS macro is available
 #ifndef NT_SUCCESS

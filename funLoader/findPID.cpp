@@ -1,10 +1,14 @@
 // original findPID.cpp class was found from EVA2 project from Orca, modified by me 
-#include <windows.h>
-#include <iostream>
-#include <string>
-#include <Tlhelp32.h>
-#include "connector.h"
-#include "sysopen.h"
+#include "common_windows_headers.h" // Centralized system and common C++ headers
+#include "connector.h"              // Includes common_windows_headers.h
+#include "sysopen.h"                // Includes common_windows_headers.h
+
+// Redundant includes:
+// #include <windows.h>
+// #include <iostream>
+// #include <string>
+// #include <Tlhelp32.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif 

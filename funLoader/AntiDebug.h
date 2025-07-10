@@ -1,8 +1,8 @@
 #pragma once
 
-#include <Windows.h>
+#include "common_windows_headers.h"
 
-// THREADINFOCLASS is defined in winternl.h (included via Windows.h).
+// THREADINFOCLASS is defined in winternl.h (included via common_windows_headers.h -> Windows.h).
 // AntiDebug functions should use this standard definition.
 // The local _THREADINFOCLASS definition has been removed.
 

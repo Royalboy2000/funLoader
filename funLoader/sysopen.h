@@ -6,16 +6,9 @@
 #ifndef SW2_HEADER_H_
 #define SW2_HEADER_H_
 
-// Include necessary low-level headers first to ensure types are defined
-// before windows.h or any other headers try to use/define them.
-// This makes sysopen.h more self-contained for the NT types it needs for prototypes.
-#include <windef.h>  // For basic types like HANDLE, DWORD, PVOID, ULONG, USHORT, BYTE, BOOLEAN
-#include <winnt.h>   // For ACCESS_MASK, LIST_ENTRY, UNICODE_STRING, OBJECT_ATTRIBUTES, PEB, LDR, THREADINFOCLASS, NTAPI etc.
-#include <ntstatus.h>// For NTSTATUS itself and status codes like STATUS_SUCCESS.
+#include "common_windows_headers.h" // Centralized Windows headers
 
-#include <windows.h> // General Windows API, may redefine or ensure consistent defs.
-
-// THREADINFOCLASS is defined in winternl.h (pulled by winnt.h or windows.h).
+// THREADINFOCLASS is now expected to be defined via common_windows_headers.h
 // We will use the standard definition for the NtSetInformationThread prototype.
 // The custom THREADINFOCLASS_SYS enum is removed to avoid conflicts.
 

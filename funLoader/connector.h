@@ -1,5 +1,5 @@
-#include <iostream>
-#include <Windows.h>
+#include "common_windows_headers.h" // Should provide iostream and Windows.h
+
 #ifndef CONNECTOR_H	
 #define CONNECTOR_H
 #ifdef __cplusplus

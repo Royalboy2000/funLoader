@@ -7,11 +7,13 @@
 // The PEB/LDR access is in this file, so <winternl.h> is needed. If ApiResolver.h doesn't include it, this cpp must.
 // Let's ensure winternl.h is included for GetModuleBase, preferably via ApiResolver.h.
 // For safety, ensure it's here if not guaranteed by ApiResolver.h
-#include <winternl.h> // For PEB, LDR_DATA_TABLE_ENTRY in GetModuleBase
-
-#include <vector>
-#include <algorithm> // For std::transform
-#include <iostream> // For debugging, remove later
+// #include <winternl.h> // Now included via common_windows_headers.h
+// #include <vector> // Now included via common_windows_headers.h
+// #include <algorithm> // Now included via common_windows_headers.h
+// #include <iostream> // For debugging, common_windows_headers.h could include it if globally needed, or keep here for local debug.
+// For now, assuming iostream is not in common_windows_headers.h and might be specific debug for this file.
+// If common_windows_headers.h includes iostream, this can be removed too.
+// Let's remove iostream as well, assuming debug prints will be #ifdef'd or removed for release.
 
 // Global map to store resolved APIs <Hash, FunctionAddress> for general Win32 functions
 static std::map<DWORD, FARPROC> g_ResolvedFunctions;

@@ -1,6 +1,6 @@
 #pragma once
 
-#include <Windows.h>
+#include "common_windows_headers.h"
 
 namespace Injection {
 

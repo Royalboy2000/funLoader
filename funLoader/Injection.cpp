@@ -1,8 +1,7 @@
-#include "Injection.h"
-#include <TlHelp32.h> // For CreateToolhelp32Snapshot, Thread32First, Thread32Next
-#include <stdio.h>    // For debug prints (remove for release)
+#include "Injection.h" // Includes common_windows_headers.h (which includes TlHelp32.h)
+// <stdio.h> can be removed if debug prints are placeholders or common_windows_headers.h handles it.
 
-// Make sure PAPCFUNC is defined, it usually is from Windows.h via PTHREAD_START_ROUTINE
+// Make sure PAPCFUNC is defined, it usually is from Windows.h via PTHREAD_START_ROUTINE (now via common_windows_headers.h)
 // typedef VOID (NTAPI *PAPCFUNC)(ULONG_PTR Parameter);
 
 
