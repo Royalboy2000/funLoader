@@ -10,8 +10,8 @@
 
 // Define THREADINFOCLASS here if not using the one from AntiDebug.h for some reason
 // For ThreadHideFromDebugger (usually value 0x11)
-#ifndef THREADINFOCLASS_DEFINED
-#define THREADINFOCLASS_DEFINED
+#ifndef THREADINFOCLASS_DEFINED_SYSOPEN
+#define THREADINFOCLASS_DEFINED_SYSOPEN
 typedef enum _THREADINFOCLASS_SYS { // Renamed to avoid conflict if AntiDebug.h is also included by user of sysopen.h
     ThreadBasicInformation_s,
     ThreadTimes_s,
@@ -190,24 +190,23 @@ EXTERN_C NTSTATUS NtProtectVirtualMemory(
 
 EXTERN_C NTSTATUS NtSetInformationThread(
     IN HANDLE ThreadHandle,
-    IN THREADINFOCLASS_SYS ThreadInformationClass, // Use the renamed enum
+    IN THREADINFOCLASS_SYS ThreadInformationClass,
     IN PVOID ThreadInformation,
     IN ULONG ThreadInformationLength
     );
 
-// Add NtUnmapViewOfSection for Stealth::UnmapSelf (conceptual)
-// EXTERN_C NTSTATUS NtUnmapViewOfSection(
-//     IN HANDLE ProcessHandle,
-//     IN PVOID BaseAddress OPTIONAL
-//     );
-
-// Add NtFreeVirtualMemory for Memory::RandomAlloc cleanup path (if not using NtUnmapViewOfSection for reserved blocks)
 EXTERN_C NTSTATUS NtFreeVirtualMemory(
     IN HANDLE ProcessHandle,
     IN PVOID *BaseAddress,
     IN OUT PSIZE_T RegionSize,
     IN ULONG FreeType
     );
+
+// For conceptual UnmapSelf in Stealth.cpp / Process Hollowing:
+// EXTERN_C NTSTATUS NtUnmapViewOfSection(
+//     IN HANDLE ProcessHandle,
+//     IN PVOID BaseAddress OPTIONAL // Note: SysWhispers often defines this with BaseAddress being PVOID*, check specific generator
+//     );
 
 
 #endif
