@@ -139,6 +139,18 @@ def compile_project(msbuild_path):
             return True
         else:
             print(f"\nBuild failed for {SOLUTION_FILE}. Return code: {process.returncode}")
+            error_content = f"Build failed for {SOLUTION_FILE}. Return code: {process.returncode}\n\n"
+            error_content += "Stdout:\n"
+            error_content += stdout + "\n\n"
+            error_content += "Stderr:\n"
+            error_content += stderr + "\n"
+            try:
+                with open("error.txt", "w") as f:
+                    f.write(error_content)
+                print("Build errors saved to error.txt")
+            except Exception as e:
+                print(f"Failed to write error.txt: {e}")
+            # Still print to console for immediate feedback
             print("Stdout:")
             print(stdout)
             print("Stderr:")
