@@ -1,8 +1,6 @@
-// Force system headers first to ensure correct type definitions
-#include <windows.h>
-#include <winternl.h> // For PEB, LDR_DATA_TABLE_ENTRY, etc.
+#include "Stealth.h" // Stealth.h includes <windows.h> and <winternl.h>
 
-#include "Stealth.h"
+// #include <winternl.h> // Already included via Stealth.h
 #include "sysopen.h" // For NtUnmapViewOfSection if we were to implement UnmapSelf
 
 // Helper macro for PEB LDR list traversal

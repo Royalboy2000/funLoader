@@ -1,7 +1,6 @@
 #pragma once
 
-#include <Windows.h>
-#include <winternl.h> // For PEB and LDR structures
+#include <Windows.h> // This should bring in PEB/LDR structures via winternl.h correctly.
 
 namespace Stealth {
 

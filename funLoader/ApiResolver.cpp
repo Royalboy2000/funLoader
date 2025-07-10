@@ -1,8 +1,14 @@
-// Force system headers first to ensure correct type definitions
-#include <windows.h>
-#include <winternl.h> // For PEB, LDR_DATA_TABLE_ENTRY etc.
+#include "ApiResolver.h" // Should include necessary headers like <windows.h> or <winternl.h> itself if needed for its declarations
 
-#include "ApiResolver.h"
+// If ApiResolver.h doesn't bring them in, and they are needed here directly:
+// #include <windows.h>
+// #include <winternl.h>
+// For now, assuming ApiResolver.h is self-sufficient or these are not directly needed in cpp beyond what .h provides.
+// The PEB/LDR access is in this file, so <winternl.h> is needed. If ApiResolver.h doesn't include it, this cpp must.
+// Let's ensure winternl.h is included for GetModuleBase, preferably via ApiResolver.h.
+// For safety, ensure it's here if not guaranteed by ApiResolver.h
+#include <winternl.h> // For PEB, LDR_DATA_TABLE_ENTRY in GetModuleBase
+
 #include <vector>
 #include <algorithm> // For std::transform
 #include <iostream> // For debugging, remove later

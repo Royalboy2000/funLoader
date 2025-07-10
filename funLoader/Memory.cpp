@@ -1,8 +1,6 @@
-// Force system headers first to ensure correct type definitions
-#include <windows.h>
-#include <winternl.h> // Explicitly include for PEB, LDR_DATA_TABLE_ENTRY, etc.
+#include "Memory.h" // Memory.h should include <windows.h> and <winternl.h> as it uses types from them.
 
-#include "Memory.h"
+// #include <winternl.h> // Already included via Memory.h
 #include "sysopen.h" // For NTAPI function prototypes like NtAllocateVirtualMemory, NtProtectVirtualMemory
 #include <random>    // For std::mt19937 and std::uniform_int_distribution
 #include <time.h>      // For seeding random number generator

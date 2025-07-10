@@ -6,12 +6,8 @@
 #ifndef SW2_HEADER_H_
 #define SW2_HEADER_H_
 
-#include <windows.h>
-// Explicitly include ntdef.h and winternl.h to ensure NT types are available
-// These are usually pulled in by windows.h, but being explicit can resolve order/availability issues.
-#include <ntdef.h>   // For POBJECT_ATTRIBUTES, PCLIENT_ID, NTSTATUS etc.
-#include <winternl.h> // For THREADINFOCLASS, PPS_ATTRIBUTE_LIST, PEB/LDR structures etc.
-
+#include <windows.h> // This should be the primary include for Windows types.
+                     // ntdef.h and winternl.h are included by windows.h.
 
 // THREADINFOCLASS is defined in winternl.h (included via windows.h).
 // We will use the standard definition for the NtSetInformationThread prototype.
