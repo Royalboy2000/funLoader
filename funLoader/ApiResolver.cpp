@@ -119,15 +119,8 @@ FARPROC ApiResolver::GetProcAddressByHash(DWORD dwHash) {
 // PopulateSyscallList and GetSyscallNumberByHash are removed.
 // Syscall resolution is handled by the existing sysopen.c (SysWhispers2) mechanism.
 
-```
-**Important Considerations for `PopulateSyscallList`:**
-
-The `PopulateSyscallList` function implemented above is a simplified approach to extracting syscall numbers. It tries to find the `mov eax, syscall_id` pattern.
-Real-world syscall extraction (like in SysWhispers2) is more complex due to:
-*   **Hooking**: `ntdll.dll` functions can be hooked by EDR/AV. The code needs to read the original bytes from disk or use other methods to find the true syscall number. The current plan includes `RepairNtdll` which would help here.
-*   **Indirect Syscalls**: Some `Nt*` functions might not directly issue a `syscall` instruction but call another internal function.
-*   **Windows Updates**: Syscall numbers can change between Windows versions and even patch levels. Sorting by address is a common heuristic used by tools like SysWhispers2, assuming that the syscall numbers are assigned to functions in `ntdll.dll` in the order of their addresses. This is generally true but not guaranteed. The provided code tries a more direct pattern search which is also common.
-
-The current `PopulateSyscallList` is a starting point. For the features requested by the user, especially `RepairNtdll`, we will need a robust way to get clean system call numbers, potentially by comparing with a fresh copy of `ntdll.dll` from disk if in-memory version is suspected to be hooked.
-
-Next, I need to create/update `sysopen.c` to use this new resolver. The existing `sysopen.h` has `SW2_` prefixed functions. I'll adapt this. Since `sysopen.c` isn't listed, I'll create a new one that defines `SW2_PopulateSyscallList` and `SW2_GetSyscallNumber` to bridge the gap with the existing `syscalls.asm`.
+// The text below was markdown/comments and has been removed to fix compilation errors.
+// ```
+// **Important Considerations for `PopulateSyscallList`:**
+// ... (rest of the comment block) ...
+// ```

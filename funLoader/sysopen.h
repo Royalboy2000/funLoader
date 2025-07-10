@@ -6,34 +6,11 @@
 #ifndef SW2_HEADER_H_
 #define SW2_HEADER_H_
 
-#include <windows.h>
+#include <windows.h> // This should provide UNICODE_STRING, OBJECT_ATTRIBUTES, CLIENT_ID, PS_ATTRIBUTE, etc. from ntdef.h/winternl.h
 
-// Define THREADINFOCLASS here if not using the one from AntiDebug.h for some reason
-// For ThreadHideFromDebugger (usually value 0x11)
-#ifndef THREADINFOCLASS_DEFINED_SYSOPEN
-#define THREADINFOCLASS_DEFINED_SYSOPEN
-typedef enum _THREADINFOCLASS_SYS { // Renamed to avoid conflict if AntiDebug.h is also included by user of sysopen.h
-    ThreadBasicInformation_s,
-    ThreadTimes_s,
-    ThreadPriority_s,
-    ThreadBasePriority_s,
-    ThreadAffinityMask_s,
-    ThreadImpersonationToken_s,
-    ThreadDescriptorTableEntry_s,
-    ThreadEnableAlignmentFaultFixup_s,
-    ThreadEventPair_Reusable_s,
-    ThreadQuerySetWin32StartAddress_s,
-    ThreadZeroTlsCell_s,
-    ThreadPerformanceCount_s,
-    ThreadAmILastThread_s,
-    ThreadIdealProcessor_s,
-    ThreadPriorityBoost_s,
-    ThreadSetTlsArrayAddress_s,
-    ThreadIsIoPending_s,
-    ThreadHideFromDebugger_s = 0x11
-} THREADINFOCLASS_SYS;
-#endif
-
+// THREADINFOCLASS is defined in winternl.h (included via windows.h).
+// We will use the standard definition for the NtSetInformationThread prototype.
+// The custom THREADINFOCLASS_SYS enum is removed to avoid conflicts.
 
 #define SW2_SEED 0xD756B6EA
 #define SW2_ROL8(v) (v << 8 | v >> 24)
@@ -42,8 +19,7 @@ typedef enum _THREADINFOCLASS_SYS { // Renamed to avoid conflict if AntiDebug.h 
 #define SW2_MAX_ENTRIES 500
 #define SW2_RVA2VA(Type, DllBase, Rva) (Type)((ULONG_PTR) DllBase + Rva)
 
-// Typedefs are prefixed to avoid pollution.
-
+// SW2 specific structures
 typedef struct _SW2_SYSCALL_ENTRY
 {
 	DWORD Hash;
@@ -56,6 +32,9 @@ typedef struct _SW2_SYSCALL_LIST
 	SW2_SYSCALL_ENTRY Entries[SW2_MAX_ENTRIES];
 } SW2_SYSCALL_LIST, * PSW2_SYSCALL_LIST;
 
+// These PEB/LDR structures are simplified versions for the syscall mechanism.
+// They are named SW2_ to avoid conflict with full definitions in winternl.h if ever mixed directly,
+// though winternl.h definitions are usually preferred if full PEB access is needed elsewhere.
 typedef struct _SW2_PEB_LDR_DATA {
 	BYTE Reserved1[8];
 	PVOID Reserved2[3];
@@ -67,6 +46,9 @@ typedef struct _SW2_LDR_DATA_TABLE_ENTRY {
 	LIST_ENTRY InMemoryOrderLinks;
 	PVOID Reserved2[2];
 	PVOID DllBase;
+	// The custom ApiResolver.cpp was trying to access fields like 'BaseDllName'
+	// which are part of the full LDR_DATA_TABLE_ENTRY, not this simplified SW2 version.
+	// This will need to be addressed in ApiResolver.cpp.
 } SW2_LDR_DATA_TABLE_ENTRY, * PSW2_LDR_DATA_TABLE_ENTRY;
 
 typedef struct _SW2_PEB {
@@ -81,13 +63,13 @@ DWORD SW2_HashSyscall(PCSTR FunctionName);
 BOOL SW2_PopulateSyscallList(void);
 EXTERN_C DWORD SW2_GetSyscallNumber(DWORD FunctionHash);
 
-typedef struct _UNICODE_STRING
-{
-	USHORT Length;
-	USHORT MaximumLength;
-	PWSTR  Buffer;
-} UNICODE_STRING, * PUNICODE_STRING;
+// UNICODE_STRING, OBJECT_ATTRIBUTES, CLIENT_ID, PS_ATTRIBUTE, PS_ATTRIBUTE_LIST
+// are defined in <ntdef.h> and <winternl.h>, which are included by <windows.h>.
+// We should rely on those standard definitions to avoid C2011 redefinition errors.
+// The EXTERN_C function prototypes below will use these standard types.
 
+// InitializeObjectAttributes is also typically defined in standard headers (e.g. <ntdef.h>)
+// We ensure it's available. If not, this provides a basic one.
 #ifndef InitializeObjectAttributes
 #define InitializeObjectAttributes( p, n, a, r, s ) { \
 	(p)->Length = sizeof( OBJECT_ATTRIBUTES );        \
@@ -99,39 +81,9 @@ typedef struct _UNICODE_STRING
 }
 #endif
 
-typedef struct _PS_ATTRIBUTE
-{
-	ULONG  Attribute;
-	SIZE_T Size;
-	union
-	{
-		ULONG Value;
-		PVOID ValuePtr;
-	} u1;
-	PSIZE_T ReturnLength;
-} PS_ATTRIBUTE, * PPS_ATTRIBUTE;
-
-typedef struct _OBJECT_ATTRIBUTES
-{
-	ULONG           Length;
-	HANDLE          RootDirectory;
-	PUNICODE_STRING ObjectName;
-	ULONG           Attributes;
-	PVOID           SecurityDescriptor;
-	PVOID           SecurityQualityOfService;
-} OBJECT_ATTRIBUTES, * POBJECT_ATTRIBUTES;
-
-typedef struct _CLIENT_ID
-{
-	HANDLE UniqueProcess;
-	HANDLE UniqueThread;
-} CLIENT_ID, * PCLIENT_ID;
-
-typedef struct _PS_ATTRIBUTE_LIST
-{
-	SIZE_T       TotalLength;
-	PS_ATTRIBUTE Attributes[1];
-} PS_ATTRIBUTE_LIST, * PPS_ATTRIBUTE_LIST;
+// Syscall function prototypes
+// These use standard Windows types like HANDLE, PVOID, ULONG, ACCESS_MASK, NTSTATUS,
+// PUNICODE_STRING, POBJECT_ATTRIBUTES, PCLIENT_ID, PPS_ATTRIBUTE_LIST etc.
 
 EXTERN_C NTSTATUS NtCreateThreadEx(
 	OUT PHANDLE ThreadHandle,
@@ -188,9 +140,10 @@ EXTERN_C NTSTATUS NtProtectVirtualMemory(
     OUT PULONG OldProtect
     );
 
+// For NtSetInformationThread, we use the standard THREADINFOCLASS from winternl.h
 EXTERN_C NTSTATUS NtSetInformationThread(
     IN HANDLE ThreadHandle,
-    IN THREADINFOCLASS_SYS ThreadInformationClass,
+    IN THREADINFOCLASS ThreadInformationClass, // Using standard THREADINFOCLASS
     IN PVOID ThreadInformation,
     IN ULONG ThreadInformationLength
     );
@@ -205,8 +158,8 @@ EXTERN_C NTSTATUS NtFreeVirtualMemory(
 // For conceptual UnmapSelf in Stealth.cpp / Process Hollowing:
 // EXTERN_C NTSTATUS NtUnmapViewOfSection(
 //     IN HANDLE ProcessHandle,
-//     IN PVOID BaseAddress OPTIONAL // Note: SysWhispers often defines this with BaseAddress being PVOID*, check specific generator
+//     IN PVOID BaseAddress OPTIONAL
 //     );
 
 
-#endif
+#endif // SW2_HEADER_H_

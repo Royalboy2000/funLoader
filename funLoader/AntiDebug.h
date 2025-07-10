@@ -2,30 +2,9 @@
 
 #include <Windows.h>
 
-// Forward declaration for _THREADINFOCLASS if not available through Windows.h
-// For ThreadHideFromDebugger (usually value 0x11)
-typedef enum _THREADINFOCLASS {
-    ThreadBasicInformation,
-    ThreadTimes,
-    ThreadPriority,
-    ThreadBasePriority,
-    ThreadAffinityMask,
-    ThreadImpersonationToken,
-    ThreadDescriptorTableEntry,
-    ThreadEnableAlignmentFaultFixup,
-    ThreadEventPair_Reusable,
-    ThreadQuerySetWin32StartAddress,
-    ThreadZeroTlsCell,
-    ThreadPerformanceCount,
-    ThreadAmILastThread,
-    ThreadIdealProcessor,
-    ThreadPriorityBoost,
-    ThreadSetTlsArrayAddress,
-    ThreadIsIoPending,
-    ThreadHideFromDebugger = 0x11 // Important value for this module
-    // ... other values
-} THREADINFOCLASS;
-
+// THREADINFOCLASS is defined in winternl.h (included via Windows.h).
+// AntiDebug functions should use this standard definition.
+// The local _THREADINFOCLASS definition has been removed.
 
 namespace AntiDebug {
 

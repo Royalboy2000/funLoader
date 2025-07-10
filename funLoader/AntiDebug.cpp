@@ -12,6 +12,11 @@
 #define STATUS_SUCCESS ((NTSTATUS)0x00000000L)
 #endif
 
+// Define STATUS_UNSUCCESSFUL if not available (typically from ntstatus.h)
+#ifndef STATUS_UNSUCCESSFUL
+#define STATUS_UNSUCCESSFUL ((NTSTATUS)0xC0000001L)
+#endif
+
 // For SetProcessMitigationPolicy (requires Windows.h, already included via AntiDebug.h)
 // Example policy - this would need specific research for useful policies.
 // typedef enum _PROCESS_MITIGATION_POLICY {
