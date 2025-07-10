@@ -66,8 +66,7 @@ BOOL Injection::InjectViaAPC(HANDLE hProc, PVOID pRemoteShellcodeAddr) {
     return apcQueued;
 }
 
-
-/*
+#if 0 // Start of block to be commented out
 // --- Conceptual Process Hollowing Implementation ---
 // This is a simplified outline and requires robust error handling, PE parsing, etc.
 
@@ -184,4 +183,4 @@ BOOL Injection::InjectViaProcessHollowing(const wchar_t* targetProcessPath, BYTE
     CloseHandle(pi.hThread);
     return TRUE;
 }
-*/
+#endif // End of block to be commented out

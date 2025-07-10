@@ -6,7 +6,12 @@
 #ifndef SW2_HEADER_H_
 #define SW2_HEADER_H_
 
-#include <windows.h> // This should provide UNICODE_STRING, OBJECT_ATTRIBUTES, CLIENT_ID, PS_ATTRIBUTE, etc. from ntdef.h/winternl.h
+#include <windows.h>
+// Explicitly include ntdef.h and winternl.h to ensure NT types are available
+// These are usually pulled in by windows.h, but being explicit can resolve order/availability issues.
+#include <ntdef.h>   // For POBJECT_ATTRIBUTES, PCLIENT_ID, NTSTATUS etc.
+#include <winternl.h> // For THREADINFOCLASS, PPS_ATTRIBUTE_LIST, PEB/LDR structures etc.
+
 
 // THREADINFOCLASS is defined in winternl.h (included via windows.h).
 // We will use the standard definition for the NtSetInformationThread prototype.
@@ -84,8 +89,9 @@ EXTERN_C DWORD SW2_GetSyscallNumber(DWORD FunctionHash);
 // Syscall function prototypes
 // These use standard Windows types like HANDLE, PVOID, ULONG, ACCESS_MASK, NTSTATUS,
 // PUNICODE_STRING, POBJECT_ATTRIBUTES, PCLIENT_ID, PPS_ATTRIBUTE_LIST etc.
+// Adding NTAPI to ensure calling convention matches system headers for extern "C" functions.
 
-EXTERN_C NTSTATUS NtCreateThreadEx(
+EXTERN_C NTSTATUS NTAPI NtCreateThreadEx(
 	OUT PHANDLE ThreadHandle,
 	IN ACCESS_MASK DesiredAccess,
 	IN POBJECT_ATTRIBUTES ObjectAttributes OPTIONAL,
@@ -98,7 +104,7 @@ EXTERN_C NTSTATUS NtCreateThreadEx(
 	IN SIZE_T MaximumStackSize,
 	IN PPS_ATTRIBUTE_LIST AttributeList OPTIONAL);
 
-EXTERN_C NTSTATUS NtAllocateVirtualMemory(
+EXTERN_C NTSTATUS NTAPI NtAllocateVirtualMemory(
 	IN HANDLE ProcessHandle,
 	IN OUT PVOID* BaseAddress,
 	IN ULONG ZeroBits,
@@ -106,17 +112,17 @@ EXTERN_C NTSTATUS NtAllocateVirtualMemory(
 	IN ULONG AllocationType,
 	IN ULONG Protect);
 
-EXTERN_C NTSTATUS NtClose(
+EXTERN_C NTSTATUS NTAPI NtClose(
 	IN HANDLE Handle);
 
-EXTERN_C NTSTATUS NtWriteVirtualMemory(
+EXTERN_C NTSTATUS NTAPI NtWriteVirtualMemory(
 	IN HANDLE ProcessHandle,
 	IN PVOID BaseAddress,
 	IN PVOID Buffer,
 	IN SIZE_T NumberOfBytesToWrite,
 	OUT PSIZE_T NumberOfBytesWritten OPTIONAL);
 
-EXTERN_C NTSTATUS NtCreateProcess(
+EXTERN_C NTSTATUS NTAPI NtCreateProcess(
 	OUT PHANDLE ProcessHandle,
 	IN ACCESS_MASK DesiredAccess,
 	IN POBJECT_ATTRIBUTES ObjectAttributes OPTIONAL,
@@ -126,13 +132,13 @@ EXTERN_C NTSTATUS NtCreateProcess(
 	IN HANDLE DebugPort OPTIONAL,
 	IN HANDLE ExceptionPort OPTIONAL);
 
-EXTERN_C NTSTATUS NtOpenProcess(
+EXTERN_C NTSTATUS NTAPI NtOpenProcess(
 	OUT PHANDLE ProcessHandle,
 	IN ACCESS_MASK DesiredAccess,
 	IN POBJECT_ATTRIBUTES ObjectAttributes,
 	IN PCLIENT_ID ClientId OPTIONAL);
 
-EXTERN_C NTSTATUS NtProtectVirtualMemory(
+EXTERN_C NTSTATUS NTAPI NtProtectVirtualMemory(
     IN HANDLE ProcessHandle,
     IN OUT PVOID* BaseAddress,
     IN OUT PSIZE_T RegionSize,
@@ -141,14 +147,14 @@ EXTERN_C NTSTATUS NtProtectVirtualMemory(
     );
 
 // For NtSetInformationThread, we use the standard THREADINFOCLASS from winternl.h
-EXTERN_C NTSTATUS NtSetInformationThread(
+EXTERN_C NTSTATUS NTAPI NtSetInformationThread(
     IN HANDLE ThreadHandle,
     IN THREADINFOCLASS ThreadInformationClass, // Using standard THREADINFOCLASS
     IN PVOID ThreadInformation,
     IN ULONG ThreadInformationLength
     );
 
-EXTERN_C NTSTATUS NtFreeVirtualMemory(
+EXTERN_C NTSTATUS NTAPI NtFreeVirtualMemory(
     IN HANDLE ProcessHandle,
     IN PVOID *BaseAddress,
     IN OUT PSIZE_T RegionSize,

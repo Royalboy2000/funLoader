@@ -1,5 +1,8 @@
-#include "ApiResolver.h"
+// Force system headers first to ensure correct type definitions
+#include <windows.h>
 #include <winternl.h> // For PEB, LDR_DATA_TABLE_ENTRY etc.
+
+#include "ApiResolver.h"
 #include <vector>
 #include <algorithm> // For std::transform
 #include <iostream> // For debugging, remove later

@@ -1,3 +1,7 @@
+// Force system headers first to ensure correct type definitions
+#include <windows.h>
+#include <winternl.h> // For PEB, LDR_DATA_TABLE_ENTRY, etc.
+
 #include "Stealth.h"
 #include "sysopen.h" // For NtUnmapViewOfSection if we were to implement UnmapSelf
 
