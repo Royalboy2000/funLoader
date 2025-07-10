@@ -1,19 +1,7 @@
-#include "ApiResolver.h" // Should include necessary headers like <windows.h> or <winternl.h> itself if needed for its declarations
+#include "ApiResolver.h" // Includes common_windows_headers.h
+#include <winternl.h>    // Explicitly include for NT types/functions like PEB/LDR, as per user feedback.
 
-// If ApiResolver.h doesn't bring them in, and they are needed here directly:
-// #include <windows.h>
-// #include <winternl.h>
-// For now, assuming ApiResolver.h is self-sufficient or these are not directly needed in cpp beyond what .h provides.
-// The PEB/LDR access is in this file, so <winternl.h> is needed. If ApiResolver.h doesn't include it, this cpp must.
-// Let's ensure winternl.h is included for GetModuleBase, preferably via ApiResolver.h.
-// For safety, ensure it's here if not guaranteed by ApiResolver.h
-// #include <winternl.h> // Now included via common_windows_headers.h
-// #include <vector> // Now included via common_windows_headers.h
-// #include <algorithm> // Now included via common_windows_headers.h
-// #include <iostream> // For debugging, common_windows_headers.h could include it if globally needed, or keep here for local debug.
-// For now, assuming iostream is not in common_windows_headers.h and might be specific debug for this file.
-// If common_windows_headers.h includes iostream, this can be removed too.
-// Let's remove iostream as well, assuming debug prints will be #ifdef'd or removed for release.
+// Other headers like <vector>, <algorithm>, <iostream> are expected from common_windows_headers.h
 
 // Global map to store resolved APIs <Hash, FunctionAddress> for general Win32 functions
 static std::map<DWORD, FARPROC> g_ResolvedFunctions;

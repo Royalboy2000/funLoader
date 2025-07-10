@@ -1,9 +1,7 @@
-#include "Memory.h" // Memory.h should include <windows.h> and <winternl.h> as it uses types from them.
-
-// #include <winternl.h> // Already included via Memory.h
-#include "sysopen.h" // For NTAPI function prototypes like NtAllocateVirtualMemory, NtProtectVirtualMemory
-#include <random>    // For std::mt19937 and std::uniform_int_distribution
-#include <time.h>      // For seeding random number generator
+#include "Memory.h"  // Includes common_windows_headers.h
+#include <winternl.h> // Explicitly include for NT types/functions, as per user feedback
+#include "sysopen.h" // Includes common_windows_headers.h
+// <random> and <time.h> are expected from common_windows_headers.h
 
 // Make sure NTSTATUS SUCCESS macro is available if not already from other includes
 #ifndef NT_SUCCESS

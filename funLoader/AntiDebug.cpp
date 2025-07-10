@@ -1,6 +1,7 @@
 #include "AntiDebug.h" // Includes common_windows_headers.h
 #include "sysopen.h"   // Includes common_windows_headers.h
-// <winternl.h> should be covered by common_windows_headers.h
+#include <winternl.h> // Explicitly include for NT types/functions, as per user feedback
+                      // (even if common_windows_headers.h also includes it)
 
 // Make sure NTSTATUS SUCCESS macro is available
 #ifndef NT_SUCCESS

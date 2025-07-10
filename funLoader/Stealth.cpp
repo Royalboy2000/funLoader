@@ -1,7 +1,6 @@
-#include "Stealth.h" // Stealth.h includes <windows.h> and <winternl.h>
-
-// #include <winternl.h> // Already included via Stealth.h
-#include "sysopen.h" // For NtUnmapViewOfSection if we were to implement UnmapSelf
+#include "Stealth.h" // Includes common_windows_headers.h
+#include <winternl.h> // Explicitly include for NT types/functions, as per user feedback
+#include "sysopen.h" // Includes common_windows_headers.h
 
 // Helper macro for PEB LDR list traversal
 // LIST_ENTRY is defined in winternl.h as:

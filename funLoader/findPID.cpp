@@ -2,6 +2,7 @@
 #include "common_windows_headers.h" // Centralized system and common C++ headers
 #include "connector.h"              // Includes common_windows_headers.h
 #include "sysopen.h"                // Includes common_windows_headers.h
+#include <winternl.h>               // Explicit include for NT types/functions
 
 // Redundant includes:
 // #include <windows.h>
