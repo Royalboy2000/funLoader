@@ -35,6 +35,9 @@ typedef struct _SW2_SYSCALL_LIST
 // These PEB/LDR structures are simplified versions for the syscall mechanism.
 // They are named SW2_ to avoid conflict with full definitions in winternl.h if ever mixed directly,
 // though winternl.h definitions are usually preferred if full PEB access is needed elsewhere.
+// Commenting these out to force reliance on system types from <winternl.h> via common_windows_headers.h
+// This may require adjustments in sysopen.c if it strictly depends on these exact SW2_ layouts.
+/*
 typedef struct _SW2_PEB_LDR_DATA {
 	BYTE Reserved1[8];
 	PVOID Reserved2[3];
@@ -58,6 +61,7 @@ typedef struct _SW2_PEB {
 	PVOID Reserved3[2];
 	PSW2_PEB_LDR_DATA Ldr;
 } SW2_PEB, * PSW2_PEB;
+*/
 
 DWORD SW2_HashSyscall(PCSTR FunctionName);
 BOOL SW2_PopulateSyscallList(void);
@@ -97,7 +101,7 @@ EXTERN_C NTSTATUS NTAPI NtCreateThreadEx(
 	IN SIZE_T ZeroBits,
 	IN SIZE_T StackSize,
 	IN SIZE_T MaximumStackSize,
-	IN PPS_ATTRIBUTE_LIST AttributeList OPTIONAL);
+	IN PVOID AttributeList OPTIONAL); // Changed PPS_ATTRIBUTE_LIST to PVOID
 
 EXTERN_C NTSTATUS NTAPI NtAllocateVirtualMemory(
 	IN HANDLE ProcessHandle,

@@ -8,6 +8,10 @@
 
 namespace AntiDebug {
 
+    // Value for NtSetInformationThread's ThreadInformationClass parameter
+    // to hide a thread from the debugger.
+    const ULONG ThreadHideFromDebugger = 0x11;
+
     /**
      * @brief Attempts to hide the current thread from debuggers using NtSetInformationThread.
      *        Also, optionally applies process mitigation policies.
