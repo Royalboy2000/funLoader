@@ -1,55 +1,30 @@
-// original findPID.cpp class was found from EVA2 project from Orca, modified by me 
-#include <windows.h>
-#include <iostream>
-#include <string>
-#include <Tlhelp32.h>
-#include "connector.h"
-#include "sysopen.h"
-#ifdef __cplusplus
-extern "C" {
-#endif 
+#include <Windows.h>
+#include <tlhelp32.h>
+#include <winternl.h>
 
+int find() {
+    HANDLE snapshot;
+    PROCESSENTRY32 processEntry;
+    int pid = 0;
+    BOOL result;
 
-    DWORD FindProcessId(const std::wstring& processName);
-
-
-    int find() {
-        std::wstring processName = L"explorer.exe";
-        DWORD processID = FindProcessId(processName);
-        return processID;
-    }
-    /*int find2() {
-        std::wstring processName = L"notepad.exe";
-        DWORD processID = FindProcessId(processName);
-        return processID;
-    
-    }*/
-
-
-    DWORD FindProcessId(const std::wstring& processName) {
-        PROCESSENTRY32 processInfo;
-        processInfo.dwSize = sizeof(processInfo);
-        HANDLE processesSnapshot = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, NULL);
-        if (processesSnapshot == INVALID_HANDLE_VALUE)
-            return 0;
-        Process32First(processesSnapshot, &processInfo);
-        if (!processName.compare(processInfo.szExeFile))
-        {
-            NtClose(processesSnapshot);
-            return processInfo.th32ProcessID;
-        }
-        while (Process32Next(processesSnapshot, &processInfo))
-        {
-            if (!processName.compare(processInfo.szExeFile))
-            {
-                NtClose(processesSnapshot);
-                return processInfo.th32ProcessID;
-            }
-        }
-        NtClose(processesSnapshot);
+    snapshot = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
+    if (snapshot == INVALID_HANDLE_VALUE) {
         return 0;
     }
 
-#ifdef __cplusplus
+    processEntry.dwSize = sizeof(PROCESSENTRY32);
+
+    result = Process32First(snapshot, &processEntry);
+
+    while (result) {
+        if (wcscmp(processEntry.szExeFile, L"explorer.exe") == 0) {
+            pid = processEntry.th32ProcessID;
+            break;
+        }
+        result = Process32Next(snapshot, &processEntry);
+    }
+
+    CloseHandle(snapshot);
+    return pid;
 }
-#endif
