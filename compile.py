@@ -1,32 +1,17 @@
 import os
 import subprocess
 
-def find_vswhere():
-    """Finds the vswhere.exe executable."""
-    return os.path.join(os.environ["ProgramFiles(x86)"], "Microsoft Visual Studio", "Installer", "vswhere.exe")
-
-def find_vs_path(vswhere_path, component, find_arg):
-    """Finds a component path using vswhere."""
+def find_vsdevcmd():
+    """Finds the VsDevCmd.bat script."""
+    vswhere_path = os.path.join(os.environ["ProgramFiles(x86)"], "Microsoft Visual Studio", "Installer", "vswhere.exe")
     if not os.path.exists(vswhere_path):
         return None
 
-    command = [vswhere_path, "-latest", "-requires", component, "-find", find_arg]
-    result = subprocess.run(command, capture_output=True, text=True)
+    result = subprocess.run([vswhere_path, "-latest", "-requires", "Microsoft.VisualStudio.Component.VC.Tools.x86.x64", "-find", "Common7\\Tools\\VsDevCmd.bat"], capture_output=True, text=True)
     if result.returncode != 0:
         return None
 
     return result.stdout.strip()
-
-def get_vs_env(vsdevcmd_path):
-    """Gets the environment variables set by VsDevCmd.bat."""
-    command = f'cmd.exe /s /c "call \\"{vsdevcmd_path}\\" -arch=amd64 -host_arch=amd64 -no_logo >nul && set"'
-    proc = subprocess.run(command, capture_output=True, text=True, shell=True)
-    env = {}
-    for line in proc.stdout.splitlines():
-        if '=' in line:
-            k, v = line.split('=', 1)
-            env[k.upper()] = v
-    return env
 
 def compile_project():
     """Compiles the funLoader project."""
@@ -39,33 +24,39 @@ def compile_project():
             print("Compilation cancelled.")
             return
 
-    vswhere_path = find_vswhere()
-    if not vswhere_path:
-        print("vswhere.exe not found.")
-        return
-
-    vsdevcmd_path = find_vs_path(vswhere_path, "Microsoft.VisualStudio.Component.VC.Tools.x86.x64", "Common7\\Tools\\VsDevCmd.bat")
+    vsdevcmd_path = find_vsdevcmd()
     if not vsdevcmd_path:
         print("VsDevCmd.bat not found.")
         return
-
-    env = get_vs_env(vsdevcmd_path)
-
-    masm_dir = os.path.dirname(find_vs_path(vswhere_path, "Microsoft.VisualStudio.Component.MASM", "VC\\Tools\\MSVC\\**\\bin\\Hostx64\\x64\\ml64.exe"))
-    if masm_dir:
-        env["PATH"] = masm_dir + os.pathsep + env.get("PATH", "")
 
     solution_path = "funLoader.sln"
     if not os.path.exists(solution_path):
         print("Solution file not found.")
         return
 
-    command = ["msbuild", solution_path, "/p:Configuration=Release", "/p:Platform=x64"]
+    build_cmd = (
+        f'call "{vsdevcmd_path}" -arch=amd64 -host_arch=amd64 -no_logo '
+        f'&& msbuild "{solution_path}" /p:Configuration=Release /p:Platform=x64 /m'
+    )
 
-    print(f"Executing command: {' '.join(command)}")
+    print(f"Executing command: {build_cmd}")
 
-    with open("output.txt", "w") as f:
-        subprocess.run(command, env={**os.environ, **env}, check=True, stdout=f, stderr=f)
+    result = subprocess.run(
+        ["cmd.exe", "/C", build_cmd],
+        capture_output=True,
+        text=True
+    )
+
+    with open("output.txt", "w", encoding="utf-8") as f:
+        f.write(result.stdout)
+        f.write(result.stderr)
+
+    if result.returncode == 0:
+        print("Build succeeded.")
+    else:
+        print(f"Build failed (exit code {result.returncode}). See output.txt for details.")
+        for line in result.stderr.strip().splitlines()[-20:]:
+            print(line)
 
 if __name__ == "__main__":
     compile_project()
