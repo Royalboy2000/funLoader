@@ -53,7 +53,7 @@ def compile_project():
         return
 
     with tempfile.NamedTemporaryFile(mode='w', delete=False, suffix=".bat") as f:
-        f.write(f'call "{vcvars_path}"\n')
+        f.write(f'call "{vcvars_path}" x64\n')
         f.write(f'"{msbuild_path}" {solution_path} /p:Configuration=Release /p:Platform=x64\n')
         temp_file_path = f.name
 
