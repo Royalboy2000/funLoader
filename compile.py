@@ -29,7 +29,8 @@ def compile_project():
 
     print(f"Executing command: {' '.join(command)}")
 
-    subprocess.run(command)
+    with open("output.txt", "w") as f:
+        subprocess.run(command, stdout=f, stderr=f)
 
 if __name__ == "__main__":
     compile_project()
