@@ -1,13 +1,17 @@
 import os
 import subprocess
 
-def find_vsdevcmd():
-    """Finds the VsDevCmd.bat script."""
-    vswhere_path = os.path.join(os.environ["ProgramFiles(x86)"], "Microsoft Visual Studio", "Installer", "vswhere.exe")
+def find_vswhere():
+    """Finds the vswhere.exe executable."""
+    return os.path.join(os.environ["ProgramFiles(x86)"], "Microsoft Visual Studio", "Installer", "vswhere.exe")
+
+def find_vs_path(vswhere_path, component, find_arg):
+    """Finds a component path using vswhere."""
     if not os.path.exists(vswhere_path):
         return None
 
-    result = subprocess.run([vswhere_path, "-latest", "-requires", "Microsoft.VisualStudio.Component.VC.Tools.x86.x64", "-find", "Common7\\Tools\\VsDevCmd.bat"], capture_output=True, text=True)
+    command = [vswhere_path, "-latest", "-requires", component, "-find", find_arg]
+    result = subprocess.run(command, capture_output=True, text=True)
     if result.returncode != 0:
         return None
 
@@ -35,12 +39,21 @@ def compile_project():
             print("Compilation cancelled.")
             return
 
-    vsdevcmd_path = find_vsdevcmd()
+    vswhere_path = find_vswhere()
+    if not vswhere_path:
+        print("vswhere.exe not found.")
+        return
+
+    vsdevcmd_path = find_vs_path(vswhere_path, "Microsoft.VisualStudio.Component.VC.Tools.x86.x64", "Common7\\Tools\\VsDevCmd.bat")
     if not vsdevcmd_path:
         print("VsDevCmd.bat not found.")
         return
 
     env = get_vs_env(vsdevcmd_path)
+
+    masm_dir = os.path.dirname(find_vs_path(vswhere_path, "Microsoft.VisualStudio.Component.MASM", "VC\\Tools\\MSVC\\**\\bin\\Hostx64\\x64\\ml64.exe"))
+    if masm_dir:
+        env["PATH"] = masm_dir + os.pathsep + env.get("PATH", "")
 
     solution_path = "funLoader.sln"
     if not os.path.exists(solution_path):
