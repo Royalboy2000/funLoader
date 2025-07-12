@@ -1,5 +1,6 @@
 import os
 import subprocess
+import tempfile
 
 def find_msbuild():
     """Finds the MSBuild executable."""
@@ -51,12 +52,17 @@ def compile_project():
         print("Solution file not found.")
         return
 
-    command = f'call "{vcvars_path}" && "{msbuild_path}" {solution_path} /p:Configuration=Release /p:Platform=x64'
+    with tempfile.NamedTemporaryFile(mode='w', delete=False, suffix=".bat") as f:
+        f.write(f'call "{vcvars_path}"\n')
+        f.write(f'"{msbuild_path}" {solution_path} /p:Configuration=Release /p:Platform=x64\n')
+        temp_file_path = f.name
 
-    print(f"Executing command: {command}")
+    print(f"Executing command: {temp_file_path}")
 
     with open("output.txt", "w") as f:
-        subprocess.run(command, stdout=f, stderr=f, shell=True)
+        subprocess.run([temp_file_path], stdout=f, stderr=f)
+
+    os.remove(temp_file_path)
 
 if __name__ == "__main__":
     compile_project()
