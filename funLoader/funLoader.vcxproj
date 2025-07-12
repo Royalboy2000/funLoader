@@ -145,10 +145,13 @@
   <ItemGroup>
     <ClCompile Include="findPID.cpp" />
     <ClCompile Include="load.cpp" />
+    <ClCompile Include="resolver.cpp" />
     <ClCompile Include="sysopen.c" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="apis.h" />
     <ClInclude Include="connector.h" />
+    <ClInclude Include="resolver.h" />
     <ClInclude Include="sysopen.h" />
   </ItemGroup>
   <ItemGroup>
