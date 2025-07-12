@@ -152,7 +152,6 @@
     <ClInclude Include="apis.h" />
     <ClInclude Include="connector.h" />
     <ClInclude Include="resolver.h" />
-    <ClInclude Include="sysopen.h" />
   </ItemGroup>
   <ItemGroup>
     <MASM Include="syscalls.asm">
