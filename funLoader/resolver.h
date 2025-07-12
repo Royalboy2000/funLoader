@@ -2,6 +2,7 @@
 
 #include <Windows.h>
 #include <winternl.h>
+#include "apis.h"
 
 #define CRC32_KERNEL32_DLL 0x68de31d
 #define CRC32_NTDLL_DLL 0x1edab0ed

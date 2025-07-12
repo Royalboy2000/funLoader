@@ -1,6 +1,7 @@
 #pragma once
 
 #include <Windows.h>
+#include <stdint.h>
 
 // CRC32 hashes for API functions
 #define CRC32_CREATEPROCESSW 0x16b32446
