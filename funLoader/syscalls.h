@@ -1,5 +1,6 @@
 #pragma once
 #include <Windows.h>
+#include <winternl.h>
 
 #include <Windows.h>
 
@@ -25,18 +26,24 @@ EXTERN_C NTSTATUS NtWriteVirtualMemory(
     PSIZE_T NumberOfBytesWritten
 );
 
-EXTERN_C NTSTATUS NtCreateThreadEx(
-    PHANDLE ThreadHandle,
-    ACCESS_MASK DesiredAccess,
-    POBJECT_ATTRIBUTES ObjectAttributes,
-    HANDLE ProcessHandle,
-    PVOID StartRoutine,
-    PVOID Argument,
-    ULONG CreateFlags,
-    ULONG_PTR ZeroBits,
-    SIZE_T StackSize,
-    SIZE_T MaximumStackSize,
-    PVOID AttributeList
+typedef struct _PS_ATTRIBUTE_LIST PS_ATTRIBUTE_LIST, *PPS_ATTRIBUTE_LIST;
+
+// Correct 11‑arg signature for the x64 NtCreateThreadEx syscall
+NTSYSCALLAPI
+NTSTATUS
+NTAPI
+NtCreateThreadEx(
+    _Out_    PHANDLE             ThreadHandle,
+    _In_     ACCESS_MASK         DesiredAccess,
+    _In_opt_ POBJECT_ATTRIBUTES  ObjectAttributes,
+    _In_     HANDLE              ProcessHandle,
+    _In_     PVOID               StartRoutine,
+    _In_opt_ PVOID               Argument,
+    _In_     ULONG               CreateFlags,
+    _In_     ULONG_PTR           ZeroBits,
+    _In_     SIZE_T              StackSize,
+    _In_     SIZE_T              MaximumStackSize,
+    _In_opt_ PPS_ATTRIBUTE_LIST  AttributeList
 );
 
 EXTERN_C NTSTATUS NtClose(
