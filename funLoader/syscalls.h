@@ -29,10 +29,7 @@ EXTERN_C NTSTATUS NtWriteVirtualMemory(
 typedef struct _PS_ATTRIBUTE_LIST PS_ATTRIBUTE_LIST, *PPS_ATTRIBUTE_LIST;
 
 // Correct 11‑arg signature for the x64 NtCreateThreadEx syscall
-NTSYSCALLAPI
-NTSTATUS
-NTAPI
-NtCreateThreadEx(
+EXTERN_C NTSTATUS NtCreateThreadEx(
     _Out_    PHANDLE             ThreadHandle,
     _In_     ACCESS_MASK         DesiredAccess,
     _In_opt_ POBJECT_ATTRIBUTES  ObjectAttributes,

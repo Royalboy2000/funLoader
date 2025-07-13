@@ -1,3 +1,4 @@
+#include "connector.h"
 #include <Windows.h>
 #include <tlhelp32.h>
 #include <winternl.h>
