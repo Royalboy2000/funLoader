@@ -79,6 +79,14 @@ def compile_project(vsdevcmd_path):
         print(f"Error: Solution '{solution}' not found.")
         sys.exit(1)
 
+    # Clean the solution
+    clean_result = subprocess.run(
+        ["msbuild", solution, "/t:Clean", "/p:Configuration=Release", "/p:Platform=x64"],
+        env={**os.environ, **env_vars},
+        capture_output=True,
+        text=True
+    )
+
     # Invoke MSBuild directly in the captured environment
     result = subprocess.run(
         ["msbuild", solution, "/p:Configuration=Release", "/p:Platform=x64", "/m"],
