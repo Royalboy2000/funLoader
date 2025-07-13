@@ -18,7 +18,7 @@
     <ClCompile Include="load.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="findPID.cpp">
+    <ClCompile Include="find.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

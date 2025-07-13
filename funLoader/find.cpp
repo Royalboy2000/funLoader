@@ -3,7 +3,7 @@
 #include <tlhelp32.h>
 #include <winternl.h>
 
-int find() {
+int findPID() {
     HANDLE snapshot;
     PROCESSENTRY32 processEntry;
     int pid = 0;

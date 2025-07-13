@@ -1,5 +1,6 @@
 .code
 
+PUBLIC NtAllocateVirtualMemory
 NtAllocateVirtualMemory proc
     mov r10, rcx
     mov eax, 18h
@@ -7,6 +8,7 @@ NtAllocateVirtualMemory proc
     ret
 NtAllocateVirtualMemory endp
 
+PUBLIC NtWriteVirtualMemory
 NtWriteVirtualMemory proc
     mov r10, rcx
     mov eax, 3ah
@@ -14,6 +16,7 @@ NtWriteVirtualMemory proc
     ret
 NtWriteVirtualMemory endp
 
+PUBLIC NtCreateThreadEx
 NtCreateThreadEx proc
     mov r10, rcx
     mov eax, 0c1h
@@ -21,6 +24,7 @@ NtCreateThreadEx proc
     ret
 NtCreateThreadEx endp
 
+PUBLIC NtClose
 NtClose proc
     mov r10, rcx
     mov eax, 0fh
