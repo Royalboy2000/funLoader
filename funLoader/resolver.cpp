@@ -37,7 +37,8 @@ void ResolveAPIs(LOADLIBRARYA pLoadLibraryA, GETPROCADDRESS pGetProcAddress, PAP
 
         // Get the module name
         char moduleName[256];
-        wcstombs(moduleName, entry->FullDllName.Buffer, sizeof(moduleName));
+        size_t convertedChars = 0;
+        wcstombs_s(&convertedChars, moduleName, sizeof(moduleName), entry->FullDllName.Buffer, sizeof(moduleName) - 1);
 
         // Hash the module name
         uint32_t moduleHash = crc32(moduleName);
