@@ -21,7 +21,7 @@
     <ClCompile Include="findPID.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="sysopen.c">
+    <ClCompile Include="syscalls.c">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -29,13 +29,8 @@
     <ClInclude Include="connector.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="sysopen.h">
+    <ClInclude Include="syscalls.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-  </ItemGroup>
-  <ItemGroup>
-    <MASM Include="syscalls.asm">
-      <Filter>Source Files</Filter>
-    </MASM>
   </ItemGroup>
 </Project>
