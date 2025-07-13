@@ -146,17 +146,15 @@
     <ClCompile Include="findPID.cpp" />
     <ClCompile Include="load.cpp" />
     <ClCompile Include="resolver.cpp" />
-    <ClCompile Include="sysopen.c" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="apis.h" />
     <ClInclude Include="connector.h" />
     <ClInclude Include="resolver.h" />
+    <ClInclude Include="syscalls.h" />
   </ItemGroup>
   <ItemGroup>
-    <MASM Include="syscalls.asm">
-      <FileType>Document</FileType>
-    </MASM>
+    <MASM Include="syscalls.asm" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

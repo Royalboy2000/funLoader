@@ -21,15 +21,12 @@
     <ClCompile Include="findPID.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="sysopen.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="connector.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="sysopen.h">
+    <ClInclude Include="syscalls.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
