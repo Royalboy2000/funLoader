@@ -16,7 +16,7 @@ def main():
     parser = argparse.ArgumentParser(description="Encrypt a payload using the JITDecrypt algorithm.")
     parser.add_argument("input_file", help="Path to the raw payload file.")
     parser.add_argument("output_file", help="Path to the output file for the encrypted payload.")
-    parser.add_argument("key_seed", type=int, help="The key seed for the encryption.")
+    parser.add_argument("key_seed", type=lambda x: int(x, 0), help="The key seed for the encryption.")
     parser.add_argument("--format", choices=["c_array", "raw"], default="c_array", help="Output format.")
     args = parser.parse_args()
 
