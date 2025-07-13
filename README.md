@@ -6,15 +6,15 @@
 
 ### 1. Create a Payload
 
-This project uses a simple XOR-encoded payload. You can use the `raw_to_shellcode.py` script to generate a payload from a raw binary file.
+This project uses a polymorphic encryption scheme to protect the payload. The `encrypt.py` script can be used to encrypt a raw binary payload.
 
-For example, to create a payload from a Metasploit shellcode file named `payload.bin`, you would run the following command:
+For example, to encrypt a Metasploit shellcode file named `payload.bin` with a key seed of `0x12345678`, you would run the following command:
 
 ```
-python raw_to_shellcode.py payload.bin
+python encrypt.py payload.bin payload.h 0x12345678
 ```
 
-This will output a C-style char array that you can copy and paste into the `load.cpp` file, replacing the existing `payload` variable.
+This will create a new file named `payload.h` that contains the encrypted payload as a C-style char array. You should then replace the existing `payload` variable in `load.cpp` with the contents of this file.
 
 ### 2. Compile the Project
 
