@@ -1,6 +1,8 @@
 #pragma once
 #include <Windows.h>
 
+#include <Windows.h>
+
 #define SYSCALL_NTALLOCATEVIRTUALMEMORY 0x18
 #define SYSCALL_NTWRITEVIRTUALMEMORY 0x3a
 #define SYSCALL_NTCREATETHREADEX 0xc1
