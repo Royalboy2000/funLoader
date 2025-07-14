@@ -1,54 +1,74 @@
-import os
+#!/usr/bin/env python3
 
-def rotr(d, n):
-    return (d >> n) | (d << (32 - n)) & 0xFFFFFFFF
+import os
+import sys
+
+# --- Configuration (no command‑line args needed) ---
+INPUT_FILE   = "shellcode.bin"
+ENCRYPT_FILE = "encrypted.bin"
+DECRYPT_FILE = "decrypted.bin"
+KEY_SEED     = 0x12345678
+
+# --- Helper functions ---
+def rotr32(val, r):
+    return ((val >> r) | (val << (32 - r))) & 0xFFFFFFFF
 
 def encrypt(buf, key_seed):
     key = key_seed ^ 0xDEADBEEF
-    encrypted = bytearray()
-    for byte in buf:
-        encrypted_byte = byte ^ (key & 0xFF)
-        encrypted.append(encrypted_byte)
-        key = rotr(key + encrypted_byte + 0x1337, 5)
-    return encrypted
+    out = bytearray()
+    for b in buf:
+        eb = b ^ (key & 0xFF)
+        out.append(eb)
+        key = rotr32(key + eb + 0x1337, 5)
+    return out
 
 def decrypt(buf, key_seed):
     key = key_seed ^ 0xDEADBEEF
-    decrypted = bytearray()
-    for byte in buf:
-        decrypted_byte = byte ^ (key & 0xFF)
-        decrypted.append(decrypted_byte)
-        key = rotr(key + decrypted_byte + 0x1337, 5)
-    return decrypted
+    out = bytearray()
+    for b in buf:
+        db = b ^ (key & 0xFF)
+        out.append(db)
+        key = rotr32(key + b + 0x1337, 5)
+    return out
 
+# --- Main logic ---
 def main():
-    # Create a dummy shellcode.bin for testing
-    with open("shellcode.bin", "wb") as f:
-        f.write(os.urandom(256))
+    # 1. Load original shellcode
+    if not os.path.isfile(INPUT_FILE):
+        print(f"Error: '{INPUT_FILE}' not found.")
+        # Create a dummy shellcode.bin for testing
+        with open(INPUT_FILE, "wb") as f:
+            f.write(os.urandom(256))
+        print(f"Created dummy '{INPUT_FILE}'.")
 
-    with open("shellcode.bin", "rb") as f:
-        original_data = bytearray(f.read())
+    with open(INPUT_FILE, "rb") as f:
+        original = bytearray(f.read())
+    print(f"Loaded {len(original)} bytes from {INPUT_FILE}")
 
-    key_seed = 0x12345678
+    # 2. Encrypt
+    encrypted = encrypt(original, KEY_SEED)
+    with open(ENCRYPT_FILE, "wb") as f:
+        f.write(encrypted)
+    print(f"Wrote {len(encrypted)} bytes to {ENCRYPT_FILE}")
 
-    # Encrypt the data
-    encrypted_data = encrypt(original_data, key_seed)
-    with open("encrypted.bin", "wb") as f:
-        f.write(encrypted_data)
+    # 3. Decrypt
+    decrypted = decrypt(encrypted, KEY_SEED)
+    with open(DECRYPT_FILE, "wb") as f:
+        f.write(decrypted)
+    print(f"Wrote {len(decrypted)} bytes to {DECRYPT_FILE}")
 
-    # Decrypt the data
-    decrypted_data = decrypt(encrypted_data, key_seed)
-    with open("decrypted.bin", "wb") as f:
-        f.write(decrypted_data)
-
-    # Compare the decrypted data with the original data
-    if original_data == decrypted_data:
-        print("SUCCESS: Decryption matches original.")
+    # 4. Verify
+    if original == decrypted:
+        print("SUCCESS: Decrypted data matches original!")
     else:
-        for i, (a, b) in enumerate(zip(original_data, decrypted_data)):
-            if a != b:
-                print(f"FAILURE: Mismatch at byte {i}")
+        # find first mismatch
+        for i, (o, d) in enumerate(zip(original, decrypted)):
+            if o != d:
+                print(f"FAILURE: Byte #{i} differs: {o:#02x} != {d:#02x}")
                 break
+        else:
+            # lengths differ?
+            print("FAILURE: Data lengths differ.")
 
 if __name__ == "__main__":
     main()
