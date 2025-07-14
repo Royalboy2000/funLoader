@@ -3,6 +3,8 @@
 #include <Windows.h>
 #include <stdint.h>
 
+BOOL QueueAPCInject_x64(HANDLE hProc, PVOID remoteAddr);
+
 // CRC32 hashes for API functions
 #define CRC32_CREATEPROCESSW 0x16b32446
 #define CRC32_OPENPROCESS 0x3DEE4534

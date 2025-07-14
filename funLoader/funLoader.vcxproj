@@ -145,6 +145,7 @@
   <ItemGroup>
     <ClCompile Include="find.cpp" />
     <ClCompile Include="load.cpp" />
+    <ClCompile Include="apc.cpp" />
     <ClCompile Include="resolver.cpp" />
   </ItemGroup>
   <ItemGroup>
