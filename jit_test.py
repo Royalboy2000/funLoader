@@ -18,7 +18,7 @@ def decrypt(buf, key_seed):
     for byte in buf:
         decrypted_byte = byte ^ (key & 0xFF)
         decrypted.append(decrypted_byte)
-        key = rotr(key + byte + 0x1337, 5)
+        key = rotr(key + decrypted_byte + 0x1337, 5)
     return decrypted
 
 def main():
