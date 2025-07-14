@@ -1,16 +1,16 @@
 import argparse
 
-def rotr(d, n):
-    return (d >> n) | (d << (32 - n)) & 0xFFFFFFFF
+def rotr32(val, r):
+    return ((val >> r) | (val << (32 - r))) & 0xFFFFFFFF
 
-def jit_decrypt(buf, key_seed):
+def encrypt(buf, key_seed):
     key = key_seed ^ 0xDEADBEEF
-    decrypted = bytearray()
-    for byte in buf:
-        decrypted_byte = byte ^ (key & 0xFF)
-        decrypted.append(decrypted_byte)
-        key = rotr(key + decrypted_byte + 0x1337, 5)
-    return decrypted
+    out = bytearray()
+    for b in buf:
+        eb = b ^ (key & 0xFF)
+        out.append(eb)
+        key = rotr32(key + eb + 0x1337, 5)
+    return out
 
 def main():
     parser = argparse.ArgumentParser(description="Encrypt a payload using the JITDecrypt algorithm.")
@@ -23,7 +23,7 @@ def main():
     with open(args.input_file, "rb") as f:
         payload = f.read()
 
-    encrypted_payload = jit_decrypt(payload, args.key_seed)
+    encrypted_payload = encrypt(payload, args.key_seed)
 
     if args.format == "c_array":
         c_array = "unsigned char payload[] = {"
