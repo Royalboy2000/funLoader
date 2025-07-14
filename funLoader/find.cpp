@@ -19,7 +19,7 @@ int findPID() {
     result = Process32First(snapshot, &processEntry);
 
     while (result) {
-        if (wcscmp(processEntry.szExeFile, L"explorer.exe") == 0) {
+        if (wcscmp(processEntry.szExeFile, L"notepad.exe") == 0) {
             pid = processEntry.th32ProcessID;
             break;
         }
