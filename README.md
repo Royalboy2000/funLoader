@@ -1,47 +1,78 @@
-# funLoader
+# FunLoader
 
-`funLoader` is a small project that demonstrates how to load and execute shellcode in a remote process.
+FunLoader is a C++ tool for injecting shellcode into remote processes using various techniques, including direct memory injection and APC injection. It incorporates several features to evade detection, such as dynamic API resolution, anti-debugging checks, and sandbox detection.
 
-## How to Build and Run
+## Features
 
-### 1. Create a Payload
+- **Shellcode Injection**: Injects shellcode into a target process.
+- **Dynamic API Resolution**: Resolves Windows API functions at runtime to obscure its functionality.
+- **Anti-Debugging and Sandbox Detection**: Includes checks to detect if it's running in a debugger or a sandbox environment.
+- **Multiple Injection Techniques**: Can be extended to support various injection methods.
+- **Payload Encryption**: Supports payload encryption and in-memory decryption.
 
-This project uses a polymorphic encryption scheme to protect the payload. The `encrypt.py` script can be used to encrypt a raw binary payload.
+## Project Structure
 
-For example, to encrypt a Metasploit shellcode file named `payload.bin` with a key seed of `0x12345678`, you would run the following command:
+The project is composed of a C++ application (`funLoader`) and a set of Python helper scripts.
 
-```
-python encrypt.py payload.bin payload.h 0x12345678
-```
+### C++ Application (`funLoader`)
 
-This will create a new file named `payload.h` that contains the encrypted payload as a C-style char array. You should then replace the existing `payload` variable in `load.cpp` with the contents of this file.
+The `funLoader` application is the core of the project. It is responsible for:
 
-### 2. Compile the Project
+- **Finding a target process**: It searches for a specific process (e.g., `notepad.exe`) or creates a new one.
+- **Allocating memory**: It allocates memory in the target process.
+- **Writing the payload**: It writes the shellcode into the allocated memory.
+- **Executing the payload**: It uses techniques like APC injection to execute the shellcode.
 
-The easiest way to compile the project is to use the provided `compile.py` script. This script will automatically find your Visual Studio installation and build the project.
+The C++ code is organized into the following files:
 
-```
-python compile.py
-```
+- `funLoader/funLoader.vcxproj`: The Visual Studio project file.
+- `funLoader/load.cpp`: The main entry point of the application.
+- `funLoader/apc.cpp`: Implements the APC injection technique.
+- `funLoader/find.cpp`: Contains the logic for finding the target process.
+- `funLoader/resolver.cpp`: Implements the dynamic API resolution.
+- `funLoader/apis.h`, `funLoader/connector.h`, `funLoader/jitdecrypt.h`, `funLoader/resolver.h`, `funLoader/syscalls.h`: Header files defining data structures, function prototypes, and constants.
+- `funLoader/syscalls.asm`: Assembly code for direct syscalls.
 
-Alternatively, you can open the `funLoader.sln` file in Visual Studio and build the solution manually.
+### Python Scripts
 
-### 3. Run the Executable
+The Python scripts provide supporting functionality for the project:
 
-Once the project is compiled, you can run the executable from the `x64/Release` directory.
+- `compile.py`: Compiles the `funLoader` C++ project using MSBuild. It automatically finds the Visual Studio installation path.
+- `encrypt.py`: Encrypts a given payload file using a custom algorithm.
+- `binencode.py`: Encodes a binary file using a simple XOR cipher.
+- `raw_to_shellcode.py`: Converts a raw binary file into a C-style shellcode array.
+- `jit_test.py`: A test script to verify the encryption and decryption logic.
 
-```
-x64/Release/funLoader.exe
-```
+## How to Compile and Run
 
-The executable will inject the payload into a new instance of `explorer.exe` and execute it.
+1. **Prerequisites**:
+   - Windows operating system.
+   - Visual Studio with C++ development tools installed.
 
-## How it Works
+2. **Compile the `funLoader` application**:
+   ```bash
+   python compile.py
+   ```
+   This will create `funLoader.exe` in the `x64/Release` directory.
 
-The project works in the following steps:
+3. **Prepare the payload**:
+   You can use a tool like Metasploit or Cobalt Strike to generate shellcode. Save the raw shellcode to a file (e.g., `shellcode.bin`).
 
-1.  **Find a target process:** The `findPID()` function in `find.cpp` finds the process ID of `explorer.exe`. If it can't find an existing instance, it creates a new one.
-2.  **Allocate memory:** The `NtAllocateVirtualMemory` syscall is used to allocate memory in the target process.
-3.  **Write the payload:** The `NtWriteVirtualMemory` syscall is used to write the XOR-encoded payload to the allocated memory.
-4.  **Create a new thread:** The `NtCreateThreadEx` syscall is used to create a new thread in the target process, which starts execution at the beginning of the payload.
-5.  **Close the handle:** The `NtClose` syscall is used to close the handle to the target process.
+4. **Encrypt the payload**:
+   ```bash
+   python encrypt.py shellcode.bin encrypted_payload.bin 0x12345678 --format c_array
+   ```
+   This will create a C-style array of the encrypted payload in `encrypted_payload.bin`.
+
+5. **Update the payload in `load.cpp`**:
+   Replace the `payload` array in `funLoader/load.cpp` with the new encrypted payload.
+
+6. **Recompile the project**:
+   Run `python compile.py` again.
+
+7. **Run `funLoader.exe`**:
+   The executable will attempt to inject the shellcode into `notepad.exe`.
+
+## Disclaimer
+
+This tool is intended for educational purposes only. The author is not responsible for any misuse of this software.
