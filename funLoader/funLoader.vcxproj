@@ -143,30 +143,10 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="find.cpp" />
-    <ClCompile Include="load.cpp" />
-    <ClCompile Include="apc.cpp" />
-    <ClCompile Include="resolver.cpp" />
-    <ClCompile Include="persistence.cpp" />
-    <ClCompile Include="module_loader.cpp" />
-    <ClCompile Include="elevation.cpp" />
-    <ClCompile Include="environment.cpp" />
+    <ClCompile Include="UpdaterService.cpp" />
   </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="apis.h" />
-    <ClInclude Include="connector.h" />
-    <ClInclude Include="resolver.h" />
-    <ClInclude Include="syscalls.h" />
-    <ClInclude Include="persistence.h" />
-    <ClInclude Include="module_loader.h" />
-    <ClInclude Include="elevation.h" />
-    <ClInclude Include="environment.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <MASM Include="syscalls.asm" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
-    <Import Project="$(VCTargetsPath)\BuildCustomizations\masm.targets" />
   </ImportGroup>
 </Project>
