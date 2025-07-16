@@ -147,12 +147,20 @@
     <ClCompile Include="load.cpp" />
     <ClCompile Include="apc.cpp" />
     <ClCompile Include="resolver.cpp" />
+    <ClCompile Include="persistence.cpp" />
+    <ClCompile Include="module_loader.cpp" />
+    <ClCompile Include="elevation.cpp" />
+    <ClCompile Include="environment.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="apis.h" />
     <ClInclude Include="connector.h" />
     <ClInclude Include="resolver.h" />
     <ClInclude Include="syscalls.h" />
+    <ClInclude Include="persistence.h" />
+    <ClInclude Include="module_loader.h" />
+    <ClInclude Include="elevation.h" />
+    <ClInclude Include="environment.h" />
   </ItemGroup>
   <ItemGroup>
     <MASM Include="syscalls.asm" />
