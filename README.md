@@ -9,6 +9,7 @@ FunLoader is a C++ tool for injecting shellcode into remote processes using vari
 - **Anti-Debugging and Sandbox Detection**: Includes checks to detect if it's running in a debugger or a sandbox environment.
 - **Multiple Injection Techniques**: Can be extended to support various injection methods.
 - **Payload Encryption**: Supports payload encryption and in-memory decryption.
+- **Persistence**: The compiled executable will copy itself to `%APPDATA%\\SystemTools\\audiodriver.exe` and add registry keys to run on startup.
 
 ## Project Structure
 
@@ -22,6 +23,7 @@ The `funLoader` application is the core of the project. It is responsible for:
 - **Allocating memory**: It allocates memory in the target process.
 - **Writing the payload**: It writes the shellcode into the allocated memory.
 - **Executing the payload**: It uses techniques like APC injection to execute the shellcode.
+- **Installing Persistence**: It copies itself to a hidden directory and sets up registry keys to ensure it runs on system startup.
 
 The C++ code is organized into the following files:
 
@@ -71,7 +73,7 @@ The Python scripts provide supporting functionality for the project:
    Run `python compile.py` again.
 
 7. **Run `funLoader.exe`**:
-   The executable will attempt to inject the shellcode into `notepad.exe`.
+   The executable will attempt to inject the shellcode into `notepad.exe`. It will also install itself for persistence.
 
 ## Disclaimer
 
