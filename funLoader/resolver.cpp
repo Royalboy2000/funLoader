@@ -95,6 +95,15 @@ void ResolveAPIs(LOADLIBRARYA pLoadLibraryA, GETPROCADDRESS pGetProcAddress, PAP
                 case CRC32_DEVICEIOCONTROL:
                     pApiFunctions->pDeviceIoControl = (FARPROC)((BYTE*)moduleBase + addressOfFunctions[addressOfNameOrdinals[i]]);
                     break;
+                case CRC32_UPDATEPROCTHREADATTRIBUTE:
+                    pApiFunctions->pUpdateProcThreadAttribute = (FARPROC)((BYTE*)moduleBase + addressOfFunctions[addressOfNameOrdinals[i]]);
+                    break;
+                case CRC32_INITIALIZEPROCTHREADATTRIBUTELIST:
+                    pApiFunctions->pInitializeProcThreadAttributeList = (FARPROC)((BYTE*)moduleBase + addressOfFunctions[addressOfNameOrdinals[i]]);
+                    break;
+                case CRC32_DELETEPROCTHREADATTRIBUTELIST:
+                    pApiFunctions->pDeleteProcThreadAttributeList = (FARPROC)((BYTE*)moduleBase + addressOfFunctions[addressOfNameOrdinals[i]]);
+                    break;
                 }
             }
         }

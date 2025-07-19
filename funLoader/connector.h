@@ -5,8 +5,8 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-	int findPID();
-	//int find2();
+	int findPID(const wchar_t* processName);
+	int findExplorerPID();
 #ifdef __cplusplus
 }
 #endif // __cplusplus

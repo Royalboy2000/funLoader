@@ -3,7 +3,7 @@
 #include <tlhelp32.h>
 #include <winternl.h>
 
-int findPID() {
+int findPID(const wchar_t* processName) {
     HANDLE snapshot;
     PROCESSENTRY32 processEntry;
     int pid = 0;
@@ -19,7 +19,7 @@ int findPID() {
     result = Process32First(snapshot, &processEntry);
 
     while (result) {
-        if (wcscmp(processEntry.szExeFile, L"notepad.exe") == 0) {
+        if (wcscmp(processEntry.szExeFile, processName) == 0) {
             pid = processEntry.th32ProcessID;
             break;
         }
@@ -28,4 +28,8 @@ int findPID() {
 
     CloseHandle(snapshot);
     return pid;
+}
+
+int findExplorerPID() {
+    return findPID(L"explorer.exe");
 }

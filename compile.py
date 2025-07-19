@@ -49,10 +49,6 @@ def compile_project(vsdevcmd_path):
     output_file = "output.txt"
     # Handle existing log file
     if os.path.exists(output_file):
-        resp = input(f"'{output_file}' exists. Delete and continue? (y/n): ").strip().lower()
-        if resp != 'y':
-            print("Aborting.")
-            sys.exit(1)
         os.remove(output_file)
 
     # Locate VsDevCmd.bat
