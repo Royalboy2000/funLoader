@@ -504,9 +504,9 @@ BOOL COMScheduledTaskPersistence() {
         _bstr_t(wszTaskName),
         pTask,
         TASK_CREATE_OR_UPDATE,
-        _variant_t(L"S-1-5-32-544"),
         _variant_t(),
-        TASK_LOGON_GROUP,
+        _variant_t(),
+        TASK_LOGON_INTERACTIVE_TOKEN,
         _variant_t(L""),
         &pRegisteredTask);
     if (FAILED(hr))
