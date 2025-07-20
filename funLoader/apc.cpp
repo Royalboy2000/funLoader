@@ -3,6 +3,7 @@
 #include <wbemidl.h>
 #include <comutil.h>
 #include <taskschd.h>
+#include "jitdecrypt.h"
 
 #pragma comment(lib, "wbemuuid.lib")
 #pragma comment(lib, "comsuppw.lib")
@@ -396,7 +397,7 @@ BOOL COMScheduledTaskPersistence() {
         return 1;
     }
 
-    hr = pRegInfo->put_Author(L"Author");
+    hr = pRegInfo->put_Author(_bstr_t(L"Author"));
     pRegInfo->Release();
     if (FAILED(hr))
     {
