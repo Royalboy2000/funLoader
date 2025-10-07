@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Testcrypt // FUD Crypter</title>
+    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #0d0d1a;
+            --primary-color: #1a1a2e;
+            --secondary-color: #2c2c4a;
+            --accent-color-1: #00e6ff; /* Cyan */
+            --accent-color-2: #ff00ff; /* Magenta */
+            --accent-color-3: #ffea00; /* Yellow */
+            --glow-color-1: rgba(0, 230, 255, 0.4);
+            --glow-color-2: rgba(255, 0, 255, 0.4);
+            --text-color: #e0e0e0;
+            --text-muted: #888;
+            --success-color: #00ffaa;
+            --error-color: #ff3366;
+            --font-family: 'Share Tech Mono', 'Consolas', monospace;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: var(--font-family);
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            font-size: 14px;
+            overflow: hidden; /* Hide overflow for background animation */
+            position: relative;
+        }
+
+        /* Animated Background Grid/Lines */
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                linear-gradient(to right, var(--bg-color) 1px, transparent 1px),
+                linear-gradient(to bottom, var(--bg-color) 1px, transparent 1px);
+            background-size: 40px 40px;
+            opacity: 0.1;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        .background-animated-lines {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            overflow: hidden;
+            z-index: 1;
+        }
+
+        .line {
+            position: absolute;
+            background: linear-gradient(to right, transparent, var(--accent-color-1), transparent);
+            height: 2px;
+            width: 100px; /* Base width */
+            opacity: 0.05;
+            animation: moveLine 15s linear infinite;
+            filter: drop-shadow(0 0 5px var(--glow-color-1));
+        }
+        .line:nth-child(2) {
+            background: linear-gradient(to right, transparent, var(--accent-color-2), transparent);
+            animation-duration: 20s;
+            animation-delay: -5s;
+            opacity: 0.07;
+            filter: drop-shadow(0 0 5px var(--glow-color-2));
+        }
+        .line:nth-child(3) {
+            background: linear-gradient(to right, transparent, var(--accent-color-3), transparent);
+            animation-duration: 18s;
+            animation-delay: -10s;
+            opacity: 0.06;
+            filter: drop-shadow(0 0 5px rgba(255, 234, 0, 0.4));
+        }
+
+        @keyframes moveLine {
+            0% { transform: translateX(-100%) rotateZ(0deg); opacity: 0; }
+            5% { opacity: 0.1; }
+            95% { opacity: 0.1; }
+            100% { transform: translateX(calc(100vw + 100%)) rotateZ(0deg); opacity: 0; }
+        }
+
+        .container {
+            width: 900px;
+            background-color: var(--primary-color);
+            border-radius: 12px;
+            border: 1px solid var(--secondary-color);
+            box-shadow: 0 0 40px rgba(0, 230, 255, 0.2), 0 0 40px rgba(255, 0, 255, 0.2);
+            overflow: hidden;
+            position: relative;
+            z-index: 10; /* Ensure container is above background elements */
+        }
+
+        header {
+            background-color: var(--secondary-color);
+            padding: 18px 25px;
+            border-bottom: 1px solid var(--bg-color);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 1.4em;
+            color: var(--accent-color-1);
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            text-shadow: 0 0 10px var(--glow-color-1);
+        }
+
+        .version {
+            font-size: 0.8em;
+            color: var(--text-muted);
+        }
+
+        main {
+            display: flex;
+            padding: 25px;
+            gap: 25px;
+        }
+
+        .settings {
+            flex: 1; /* Takes equal space */
+            padding-right: 25px;
+            border-right: 1px solid var(--secondary-color);
+        }
+
+        .output {
+            flex: 1; /* Takes equal space */
+            padding-left: 25px;
+        }
+
+        h2 {
+            font-size: 1.1em;
+            color: var(--text-color);
+            border-bottom: 1px solid var(--secondary-color);
+            padding-bottom: 12px;
+            margin-top: 0;
+            margin-bottom: 25px;
+            letter-spacing: 1px;
+            color: var(--accent-color-2);
+            text-shadow: 0 0 8px var(--glow-color-2);
+        }
+
+        .upload-area {
+            border: 2px dashed var(--accent-color-1);
+            border-radius: 8px;
+            padding: 40px;
+            text-align: center;
+            cursor: pointer;
+            transition: border-color 0.3s, background-color 0.3s, box-shadow 0.3s;
+            position: relative;
+            overflow: hidden;
+            background: rgba(0,0,0,0.2);
+        }
+
+        .upload-area:hover, .upload-area.dragover {
+            border-color: var(--accent-color-3);
+            background-color: rgba(255, 234, 0, 0.1);
+            box-shadow: 0 0 15px var(--glow-color-3);
+        }
+
+        .upload-area .icon {
+            font-size: 2.5em;
+            color: var(--accent-color-1);
+            text-shadow: 0 0 10px var(--glow-color-1);
+            margin-bottom: 10px;
+        }
+        
+        .upload-area p {
+            margin: 0;
+            color: var(--text-muted);
+            line-height: 1.5;
+        }
+
+        .file-info {
+            display: none;
+            text-align: center;
+            color: var(--success-color);
+            font-size: 1.1em;
+            text-shadow: 0 0 5px rgba(0, 255, 170, 0.3);
+        }
+
+        .options { margin-top: 30px; }
+
+        .option {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px dotted var(--secondary-color);
+        }
+        .option:last-child { border-bottom: none; }
+        .option span { color: var(--text-color); }
+
+        /* Fancy Toggle Switch CSS (more vibrant) */
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 45px;
+            height: 22px;
+        }
+        .switch input { display: none; }
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-color: var(--secondary-color);
+            transition: .4s;
+            border-radius: 22px;
+            box-shadow: inset 0 0 5px rgba(0,0,0,0.5);
+        }
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 16px; width: 16px;
+            left: 3px; bottom: 3px;
+            background-color: #f0f0f0;
+            transition: .4s;
+            border-radius: 50%;
+            box-shadow: 0 0 5px rgba(0,0,0,0.3);
+        }
+        input:checked + .slider { background-color: var(--accent-color-1); box-shadow: inset 0 0 5px var(--glow-color-1); }
+        input:checked + .slider:before {
+            transform: translateX(23px);
+            background-color: var(--bg-color);
+            box-shadow: 0 0 8px var(--glow-color-1);
+        }
+        
+        #build-button {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(90deg, var(--accent-color-1), var(--accent-color-2));
+            color: var(--bg-color);
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1em;
+            font-family: var(--font-family);
+            cursor: pointer;
+            margin-top: 30px;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-weight: bold;
+            box-shadow: 0 0 15px rgba(0, 230, 255, 0.4);
+        }
+
+        #build-button:hover:not(:disabled) {
+            background: linear-gradient(90deg, var(--accent-color-2), var(--accent-color-1));
+            box-shadow: 0 0 25px rgba(255, 0, 255, 0.6);
+            transform: translateY(-2px);
+        }
+        
+        #build-button:disabled {
+            background: var(--secondary-color);
+            color: var(--text-muted);
+            cursor: not-allowed;
+            box-shadow: none;
+            transform: none;
+        }
+
+        .console {
+            background-color: var(--bg-color);
+            height: 320px;
+            border-radius: 8px;
+            padding: 15px;
+            overflow-y: auto;
+            font-size: 0.9em;
+            border: 1px solid var(--secondary-color);
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.5);
+            line-height: 1.6;
+        }
+        
+        .console-line {
+            white-space: pre-wrap;
+            opacity: 0.9;
+        }
+
+        .console-line .timestamp { color: var(--text-muted); opacity: 0.7; }
+        .console-line .status-init { color: var(--accent-color-1); }
+        .console-line .status-ok { color: var(--success-color); }
+        .console-line .status-process { color: var(--accent-color-3); }
+        .console-line .status-error { color: var(--error-color); }
+
+
+        /* Scrollbar Styling (Webkit - Chrome, Safari) */
+        .console::-webkit-scrollbar {
+            width: 8px;
+        }
+        .console::-webkit-scrollbar-track {
+            background: var(--primary-color);
+            border-radius: 10px;
+        }
+        .console::-webkit-scrollbar-thumb {
+            background: var(--secondary-color);
+            border-radius: 10px;
+            border: 2px solid var(--primary-color);
+        }
+        .console::-webkit-scrollbar-thumb:hover {
+            background: var(--accent-color-1);
+        }
+
+
+        .progress-bar {
+            width: 100%;
+            background-color: var(--secondary-color);
+            border-radius: 5px;
+            overflow: hidden;
+            margin-top: 20px;
+            height: 10px;
+            display: none;
+            box-shadow: inset 0 0 5px rgba(0,0,0,0.5);
+        }
+
+        .progress-bar-inner {
+            width: 0%;
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent-color-1), var(--accent-color-2));
+            transition: width 0.5s ease-in-out;
+            box-shadow: 0 0 8px var(--glow-color-1), 0 0 8px var(--glow-color-2);
+        }
+
+    </style>
+</head>
+<body>
+    <div class="background-animated-lines"></div>
+
+    <div class="container">
+        <header>
+            <h1>Testcrypt</h1>
+            <span class="version">v3.1.2 // FUD EDITION</span>
+        </header>
+        <main>
+            <section class="settings">
+                <h2>1. Select Input</h2>
+                <div class="upload-area" id="upload-area">
+                    <div class="upload-prompt">
+                        <div class="icon">UPLOAD</div>
+                        <p>Drag & Drop .exe, .dll, or raw Shellcode here</p>
+                        <p style="font-size: 0.7em; color: var(--text-muted);"><i>(Visual Demo Only - No actual file processing)</i></p>
+                    </div>
+                    <div class="file-info" id="file-info">
+                        <p>Input File Loaded:</p>
+                        <strong id="file-name"></strong>
+                    </div>
+                </div>
+
+                <div class="options">
+                    <h2>2. Obfuscation & Crypter Options</h2>
+                    <div class="option">
+                        <span>Advanced Polymorphic Engine</span>
+                        <label class="switch"><input type="checkbox" checked><span class="slider"></span></label>
+                    </div>
+                    <div class="option">
+                        <span>AES-256 Encryption (Dynamic Key)</span>
+                        <label class="switch"><input type="checkbox" checked><span class="slider"></span></label>
+                    </div>
+                    <div class="option">
+                        <span>Anti-Debug / Anti-VM / Anti-Analysis</span>
+                        <label class="switch"><input type="checkbox" checked><span class="slider"></span></label>
+                    </div>
+                    <div class="option">
+                        <span>Startup Persistence (Reg / SchTasks)</span>
+                        <label class="switch"><input type="checkbox"><span class="slider"></span></label>
+                    </div>
+                    <div class="option">
+                        <span>Melt File (Self-Deletion)</span>
+                        <label class="switch"><input type="checkbox"><span class="slider"></span></label>
+                    </div>
+                </div>
+
+                <button id="build-button" disabled>Build FUD Payload</button>
+
+            </section>
+            <section class="output">
+                <h2>3. Build Output & Log</h2>
+                <div class="console" id="console"></div>
+                <div class="progress-bar" id="progress-bar">
+                    <div class="progress-bar-inner" id="progress-bar-inner"></div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script>
+        const uploadArea = document.getElementById('upload-area');
+        const uploadPrompt = uploadArea.querySelector('.upload-prompt');
+        const fileInfo = document.getElementById('file-info');
+        const fileNameDisplay = document.getElementById('file-name');
+        const buildButton = document.getElementById('build-button');
+        const consoleEl = document.getElementById('console');
+        const progressBar = document.getElementById('progress-bar');
+        const progressBarInner = document.getElementById('progress-bar-inner');
+        const backgroundLines = document.querySelector('.background-animated-lines');
+        
+        let fileIsLoaded = false;
+        let animationInterval;
+
+        // --- Background Line Animation Setup ---
+        function createBackgroundLines() {
+            for (let i = 0; i < 10; i++) { // Create 10 lines
+                const line = document.createElement('div');
+                line.classList.add('line');
+                // Randomize starting position, duration, and color influence
+                const top = Math.random() * 100 + '%';
+                const left = Math.random() * 100 + '%';
+                const delay = Math.random() * -15 + 's'; // Negative delay for staggered start
+                const duration = Math.random() * 10 + 10 + 's'; // 10-20 seconds
+                const width = Math.random() * 150 + 50 + 'px'; // 50-200px
+                const rotation = Math.random() * 10 - 5 + 'deg'; // Slight rotation
+
+                line.style.top = top;
+                line.style.left = left;
+                line.style.animationDelay = delay;
+                line.style.animationDuration = duration;
+                line.style.width = width;
+                line.style.transform = `translateX(-100%) rotateZ(${rotation})`;
+
+                // Randomly assign accent color classes
+                const colorVariant = Math.floor(Math.random() * 3) + 1;
+                if (colorVariant === 2) {
+                    line.style.background = 'linear-gradient(to right, transparent, var(--accent-color-2), transparent)';
+                    line.style.filter = 'drop-shadow(0 0 5px var(--glow-color-2))';
+                    line.style.opacity = '0.07';
+                } else if (colorVariant === 3) {
+                    line.style.background = 'linear-gradient(to right, transparent, var(--accent-color-3), transparent)';
+                    line.style.filter = 'drop-shadow(0 0 5px rgba(255, 234, 0, 0.4))';
+                    line.style.opacity = '0.06';
+                } else {
+                    line.style.background = 'linear-gradient(to right, transparent, var(--accent-color-1), transparent)';
+                    line.style.filter = 'drop-shadow(0 0 5px var(--glow-color-1))';
+                    line.style.opacity = '0.05';
+                }
+                
+                backgroundLines.appendChild(line);
+            }
+        }
+        createBackgroundLines();
+
+
+        // --- Fake Upload Logic ---
+        uploadArea.addEventListener('click', () => {
+             if (!fileIsLoaded) {
+                handleFileSelect({ name: 'malicious_payload.exe', size: 132456 });
+            }
+        });
+        
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('dragover');
+        });
+        
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('dragover');
+        });
+
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+            if (e.dataTransfer.files.length > 0 && !fileIsLoaded) {
+                handleFileSelect(e.dataTransfer.files[0]);
+            }
+        });
+
+        function handleFileSelect(file) {
+            fileIsLoaded = true;
+            fileNameDisplay.textContent = file.name;
+            uploadPrompt.style.display = 'none';
+            fileInfo.style.display = 'block';
+            buildButton.disabled = false;
+            logToConsole(`[SYS] Input file '${file.name}' loaded successfully.`, 'status-ok');
+            logToConsole(`[SCAN] Initial static analysis complete: ${Math.floor(Math.random() * 10) + 1}% detection rate.`, 'status-process');
+        }
+
+        // --- Fake Build Logic ---
+        buildButton.addEventListener('click', () => {
+            buildButton.disabled = true;
+            progressBar.style.display = 'block';
+            progressBarInner.style.width = '0%';
+            consoleEl.innerHTML = ''; // Clear console
+            logToConsole('--- TESTCRYPT BUILD SESSION INITIATED ---', 'status-init');
+            
+            const steps = [
+                { msg: '[ENGINE] Initializing polymorphic engine v2.7...', delay: 800, status: 'status-init', progress: 5 },
+                { msg: '[READ] Reading target file bytes...', delay: 1200, status: 'status-process', progress: 10 },
+                { msg: '[TRANSFORM] Applying random instruction permutation...', delay: 1500, status: 'status-process', progress: 25 },
+                { msg: '[KEYGEN] Generating ephemeral AES-256 key...', delay: 1000, status: 'status-process', progress: 35 },
+                { msg: '[ENCRYPT] Encrypting core payload with dynamic key...', delay: 2000, status: 'status-process', progress: 55 },
+                { msg: '[STUB] Integrating anti-debug & anti-VM techniques...', delay: 1800, status: 'status-process', progress: 70 },
+                { msg: '[STUB] Appending custom unpacking stub...', delay: 1500, status: 'status-process', progress: 85 },
+                { msg: '[COMPILE] Finalizing executable structure...', delay: 1000, status: 'status-process', progress: 95 },
+                { msg: '[SUCCESS] Build complete! Output: TESTCRYPT_FUD.exe', delay: 800, status: 'status-ok', progress: 100 },
+            ];
+
+            let cumulativeDelay = 0;
+            steps.forEach(step => {
+                cumulativeDelay += step.delay;
+                setTimeout(() => {
+                    logToConsole(step.msg, step.status);
+                    progressBarInner.style.width = step.progress + '%';
+                }, cumulativeDelay);
+            });
+
+            // Final actions after build completes
+            setTimeout(() => {
+                logToConsole('[SYS] Performing post-build integrity checks...', 'status-init');
+                setTimeout(() => {
+                    logToConsole('[INFO] Static analysis evasion rate: 98.7% (FUD)', 'status-success'); // Fake success
+                    logToConsole('[INFO] Initiating secure download...', 'status-init');
+                    fakeDownload();
+                    resetUI();
+                }, 1500);
+            }, cumulativeDelay + 1000);
+        });
+
+        function logToConsole(message, statusClass = '') {
+            const time = new Date().toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' });
+            consoleEl.innerHTML += 
+                `<div class="console-line">` +
+                `<span class="timestamp">[${time}] </span>` +
+                `<span class="${statusClass}">${message}</span>` +
+                `</div>`;
+            consoleEl.scrollTop = consoleEl.scrollHeight; // Auto-scroll
+        }
+
+        function fakeDownload() {
+            const element = document.createElement('a');
+            const file = new Blob(['// This is a dummy file for presentation purposes.\n// Testcrypt v3.1.2 FUD Edition Output\n\n// Content intentionally left blank for security reasons.\n// In a real scenario, this would be your FUD payload.'], {type: 'text/plain'});
+            element.href = URL.createObjectURL(file);
+            element.download = "TESTCRYPT_FUD.exe"; // Simulates an executable download
+            document.body.appendChild(element); 
+            element.click();
+            document.body.removeChild(element);
+            logToConsole('[DOWNLOAD] TESTCRYPT_FUD.exe initiated.', 'status-ok');
+        }
+
+        function resetUI() {
+            setTimeout(() => {
+                fileIsLoaded = false;
+                uploadPrompt.style.display = 'block';
+                fileInfo.style.display = 'none';
+                progressBar.style.display = 'none';
+                progressBarInner.style.width = '0%';
+                buildButton.disabled = true;
+                logToConsole('--- SESSION ENDED / AWAITING NEW INPUT ---', 'status-init');
+            }, 3000); // Wait a bit before resetting
+        }
+
+        // Initialize with some fake console output for a live feel
+        setTimeout(() => {
+            logToConsole('[SYS] Testcrypt v3.1.2 initializing...', 'status-init');
+        }, 500);
+        setTimeout(() => {
+            logToConsole('[SYS] Secure connection established. Ready for input.', 'status-ok');
+        }, 1500);
+        setTimeout(() => {
+            logToConsole('[INFO] Current definitions: Polymorphic Engine v2.7, AES-256, Anti-Debug/VM, Persistence.', 'status-init');
+        }, 2500);
+
+    </script>
+</body>
+</html>
