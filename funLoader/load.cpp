@@ -95,12 +95,18 @@ int antidbg() {
 }
 
 int main(int argc, char* argv[]) {
-if (antidbg() == 44) {
-	printf("Running xD\n");
-	return 0;
-}
-else if (antidbg() == -1) {
-	printf("in a sandbox xD\n");
-	return 0;
- }
+	// ANTI_DEBUG_START
+	if (antidbg() == 44) {
+		printf("Running xD\n");
+		return 0;
+	}
+	else if (antidbg() == -1) {
+		printf("in a sandbox xD\n");
+		return 0;
+	}
+	// ANTI_DEBUG_END
+
+	// This part is left here as a fallback for when anti-debug is disabled.
+	// The Python script will insert remInj() before the if(false) statement.
+	// if (false) { }
 }

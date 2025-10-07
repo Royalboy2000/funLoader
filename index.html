@@ -350,10 +350,10 @@
             <section class="settings">
                 <h2>1. Select Input</h2>
                 <div class="upload-area" id="upload-area">
+                    <input type="file" id="file-input" hidden/>
                     <div class="upload-prompt">
                         <div class="icon">UPLOAD</div>
                         <p>Drag & Drop .exe, .dll, or raw Shellcode here</p>
-                        <p style="font-size: 0.7em; color: var(--text-muted);"><i>(Visual Demo Only - No actual file processing)</i></p>
                     </div>
                     <div class="file-info" id="file-info">
                         <p>Input File Loaded:</p>
@@ -365,23 +365,23 @@
                     <h2>2. Obfuscation & Crypter Options</h2>
                     <div class="option">
                         <span>Advanced Polymorphic Engine</span>
-                        <label class="switch"><input type="checkbox" checked><span class="slider"></span></label>
+                        <label class="switch"><input type="checkbox" id="polymorphic-engine" checked><span class="slider"></span></label>
                     </div>
                     <div class="option">
                         <span>AES-256 Encryption (Dynamic Key)</span>
-                        <label class="switch"><input type="checkbox" checked><span class="slider"></span></label>
+                        <label class="switch"><input type="checkbox" id="aes-encryption" checked><span class="slider"></span></label>
                     </div>
                     <div class="option">
                         <span>Anti-Debug / Anti-VM / Anti-Analysis</span>
-                        <label class="switch"><input type="checkbox" checked><span class="slider"></span></label>
+                        <label class="switch"><input type="checkbox" id="anti-vm" checked><span class="slider"></span></label>
                     </div>
                     <div class="option">
                         <span>Startup Persistence (Reg / SchTasks)</span>
-                        <label class="switch"><input type="checkbox"><span class="slider"></span></label>
+                        <label class="switch"><input type="checkbox" id="persistence"><span class="slider"></span></label>
                     </div>
                     <div class="option">
                         <span>Melt File (Self-Deletion)</span>
-                        <label class="switch"><input type="checkbox"><span class="slider"></span></label>
+                        <label class="switch"><input type="checkbox" id="melt-file"><span class="slider"></span></label>
                     </div>
                 </div>
 
@@ -400,6 +400,7 @@
 
     <script>
         const uploadArea = document.getElementById('upload-area');
+        const fileInput = document.getElementById('file-input');
         const uploadPrompt = uploadArea.querySelector('.upload-prompt');
         const fileInfo = document.getElementById('file-info');
         const fileNameDisplay = document.getElementById('file-name');
@@ -407,57 +408,14 @@
         const consoleEl = document.getElementById('console');
         const progressBar = document.getElementById('progress-bar');
         const progressBarInner = document.getElementById('progress-bar-inner');
-        const backgroundLines = document.querySelector('.background-animated-lines');
         
-        let fileIsLoaded = false;
-        let animationInterval;
+        let selectedFile = null;
 
-        // --- Background Line Animation Setup ---
-        function createBackgroundLines() {
-            for (let i = 0; i < 10; i++) { // Create 10 lines
-                const line = document.createElement('div');
-                line.classList.add('line');
-                // Randomize starting position, duration, and color influence
-                const top = Math.random() * 100 + '%';
-                const left = Math.random() * 100 + '%';
-                const delay = Math.random() * -15 + 's'; // Negative delay for staggered start
-                const duration = Math.random() * 10 + 10 + 's'; // 10-20 seconds
-                const width = Math.random() * 150 + 50 + 'px'; // 50-200px
-                const rotation = Math.random() * 10 - 5 + 'deg'; // Slight rotation
-
-                line.style.top = top;
-                line.style.left = left;
-                line.style.animationDelay = delay;
-                line.style.animationDuration = duration;
-                line.style.width = width;
-                line.style.transform = `translateX(-100%) rotateZ(${rotation})`;
-
-                // Randomly assign accent color classes
-                const colorVariant = Math.floor(Math.random() * 3) + 1;
-                if (colorVariant === 2) {
-                    line.style.background = 'linear-gradient(to right, transparent, var(--accent-color-2), transparent)';
-                    line.style.filter = 'drop-shadow(0 0 5px var(--glow-color-2))';
-                    line.style.opacity = '0.07';
-                } else if (colorVariant === 3) {
-                    line.style.background = 'linear-gradient(to right, transparent, var(--accent-color-3), transparent)';
-                    line.style.filter = 'drop-shadow(0 0 5px rgba(255, 234, 0, 0.4))';
-                    line.style.opacity = '0.06';
-                } else {
-                    line.style.background = 'linear-gradient(to right, transparent, var(--accent-color-1), transparent)';
-                    line.style.filter = 'drop-shadow(0 0 5px var(--glow-color-1))';
-                    line.style.opacity = '0.05';
-                }
-                
-                backgroundLines.appendChild(line);
-            }
-        }
-        createBackgroundLines();
-
-
-        // --- Fake Upload Logic ---
-        uploadArea.addEventListener('click', () => {
-             if (!fileIsLoaded) {
-                handleFileSelect({ name: 'malicious_payload.exe', size: 132456 });
+        // --- Real Upload Logic ---
+        uploadArea.addEventListener('click', () => fileInput.click());
+        fileInput.addEventListener('change', () => {
+            if (fileInput.files.length > 0) {
+                handleFileSelect(fileInput.files[0]);
             }
         });
         
@@ -473,60 +431,79 @@
         uploadArea.addEventListener('drop', (e) => {
             e.preventDefault();
             uploadArea.classList.remove('dragover');
-            if (e.dataTransfer.files.length > 0 && !fileIsLoaded) {
+            if (e.dataTransfer.files.length > 0) {
                 handleFileSelect(e.dataTransfer.files[0]);
             }
         });
 
         function handleFileSelect(file) {
-            fileIsLoaded = true;
+            selectedFile = file;
             fileNameDisplay.textContent = file.name;
             uploadPrompt.style.display = 'none';
             fileInfo.style.display = 'block';
             buildButton.disabled = false;
             logToConsole(`[SYS] Input file '${file.name}' loaded successfully.`, 'status-ok');
-            logToConsole(`[SCAN] Initial static analysis complete: ${Math.floor(Math.random() * 10) + 1}% detection rate.`, 'status-process');
         }
 
-        // --- Fake Build Logic ---
-        buildButton.addEventListener('click', () => {
+        // --- Real Build Logic ---
+        buildButton.addEventListener('click', async () => {
+            if (!selectedFile) {
+                logToConsole('[ERROR] No file selected for build.', 'status-error');
+                return;
+            }
+
             buildButton.disabled = true;
             progressBar.style.display = 'block';
             progressBarInner.style.width = '0%';
             consoleEl.innerHTML = ''; // Clear console
-            logToConsole('--- TESTCRYPT BUILD SESSION INITIATED ---', 'status-init');
-            
-            const steps = [
-                { msg: '[ENGINE] Initializing polymorphic engine v2.7...', delay: 800, status: 'status-init', progress: 5 },
-                { msg: '[READ] Reading target file bytes...', delay: 1200, status: 'status-process', progress: 10 },
-                { msg: '[TRANSFORM] Applying random instruction permutation...', delay: 1500, status: 'status-process', progress: 25 },
-                { msg: '[KEYGEN] Generating ephemeral AES-256 key...', delay: 1000, status: 'status-process', progress: 35 },
-                { msg: '[ENCRYPT] Encrypting core payload with dynamic key...', delay: 2000, status: 'status-process', progress: 55 },
-                { msg: '[STUB] Integrating anti-debug & anti-VM techniques...', delay: 1800, status: 'status-process', progress: 70 },
-                { msg: '[STUB] Appending custom unpacking stub...', delay: 1500, status: 'status-process', progress: 85 },
-                { msg: '[COMPILE] Finalizing executable structure...', delay: 1000, status: 'status-process', progress: 95 },
-                { msg: '[SUCCESS] Build complete! Output: TESTCRYPT_FUD.exe', delay: 800, status: 'status-ok', progress: 100 },
-            ];
+            logToConsole('--- BUILD SESSION INITIATED ---', 'status-init');
 
-            let cumulativeDelay = 0;
-            steps.forEach(step => {
-                cumulativeDelay += step.delay;
-                setTimeout(() => {
-                    logToConsole(step.msg, step.status);
-                    progressBarInner.style.width = step.progress + '%';
-                }, cumulativeDelay);
-            });
+            const formData = new FormData();
+            formData.append('file', selectedFile);
+            formData.append('antiVm', document.getElementById('anti-vm').checked);
+            // Add other options here if needed
+            // formData.append('polymorphicEngine', document.getElementById('polymorphic-engine').checked);
+            // formData.append('aesEncryption', document.getElementById('aes-encryption').checked);
 
-            // Final actions after build completes
-            setTimeout(() => {
-                logToConsole('[SYS] Performing post-build integrity checks...', 'status-init');
-                setTimeout(() => {
-                    logToConsole('[INFO] Static analysis evasion rate: 98.7% (FUD)', 'status-success'); // Fake success
-                    logToConsole('[INFO] Initiating secure download...', 'status-init');
-                    fakeDownload();
-                    resetUI();
-                }, 1500);
-            }, cumulativeDelay + 1000);
+            try {
+                logToConsole('[BUILD] Uploading file and options...', 'status-process');
+                updateProgress(10);
+
+                const response = await fetch('/build', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.error || 'Build failed on the server.');
+                }
+
+                const data = await response.json();
+
+                logToConsole('[BUILD] Server processing complete.', 'status-ok');
+                updateProgress(80);
+
+                if(data.log) {
+                    data.log.forEach(log => {
+                        logToConsole(`[SERVER] ${log.msg}`, log.status);
+                    });
+                }
+
+                if (data.downloadUrl) {
+                    logToConsole(`[SUCCESS] Build complete! Output available for download.`, 'status-ok');
+                    updateProgress(100);
+                    initiateDownload(data.downloadUrl);
+                } else {
+                     throw new Error('No download URL provided by server.');
+                }
+
+            } catch (error) {
+                logToConsole(`[FATAL] ${error.message}`, 'status-error');
+                updateProgress(100, true); // Show error on progress bar
+            } finally {
+                resetUI();
+            }
         });
 
         function logToConsole(message, statusClass = '') {
@@ -539,39 +516,40 @@
             consoleEl.scrollTop = consoleEl.scrollHeight; // Auto-scroll
         }
 
-        function fakeDownload() {
+        function updateProgress(percentage, isError = false) {
+            progressBarInner.style.width = percentage + '%';
+            if (isError) {
+                 progressBarInner.style.background = 'var(--error-color)';
+            } else {
+                 progressBarInner.style.background = 'linear-gradient(90deg, var(--accent-color-1), var(--accent-color-2))';
+            }
+        }
+
+        function initiateDownload(url) {
             const element = document.createElement('a');
-            const file = new Blob(['// This is a dummy file for presentation purposes.\n// Testcrypt v3.1.2 FUD Edition Output\n\n// Content intentionally left blank for security reasons.\n// In a real scenario, this would be your FUD payload.'], {type: 'text/plain'});
-            element.href = URL.createObjectURL(file);
-            element.download = "TESTCRYPT_FUD.exe"; // Simulates an executable download
+            element.href = url;
+            element.download = url.split('/').pop();
             document.body.appendChild(element); 
             element.click();
             document.body.removeChild(element);
-            logToConsole('[DOWNLOAD] TESTCRYPT_FUD.exe initiated.', 'status-ok');
+            logToConsole(`[DOWNLOAD] ${element.download} initiated.`, 'status-ok');
         }
 
         function resetUI() {
             setTimeout(() => {
-                fileIsLoaded = false;
+                selectedFile = null;
                 uploadPrompt.style.display = 'block';
                 fileInfo.style.display = 'none';
                 progressBar.style.display = 'none';
                 progressBarInner.style.width = '0%';
                 buildButton.disabled = true;
+                fileInput.value = ''; // Reset file input
                 logToConsole('--- SESSION ENDED / AWAITING NEW INPUT ---', 'status-init');
-            }, 3000); // Wait a bit before resetting
+            }, 3000);
         }
 
-        // Initialize with some fake console output for a live feel
-        setTimeout(() => {
-            logToConsole('[SYS] Testcrypt v3.1.2 initializing...', 'status-init');
-        }, 500);
-        setTimeout(() => {
-            logToConsole('[SYS] Secure connection established. Ready for input.', 'status-ok');
-        }, 1500);
-        setTimeout(() => {
-            logToConsole('[INFO] Current definitions: Polymorphic Engine v2.7, AES-256, Anti-Debug/VM, Persistence.', 'status-init');
-        }, 2500);
+        // Initialize
+        logToConsole('[SYS] Crypter UI Initialized. Ready for input.', 'status-ok');
 
     </script>
 </body>

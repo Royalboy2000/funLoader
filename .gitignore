@@ -4,16 +4,34 @@ __pycache__/
 *.pyo
 *.pyd
 
-# IDE / Editor
-.vscode/
-.idea/
-
-# Dependencies
-venv/
-env/
-.env
-
-# Downloaded files
-downloaded.exe
+# Build artifacts
+*.o
+*.obj
 *.exe
-test.exe
+*.dll
+*.so
+*.bin
+
+# Log files
+app.log
+*.log
+
+# Uploads directory
+uploads/
+
+# IDE files (Visual Studio)
+*.sln.docstates
+*.suo
+*.user
+*.vcxproj.user
+*.vcxproj.filters.user
+funLoader/Debug/
+funLoader/Release/
+funLoader.sdf
+*.ilk
+*.pdb
+*.tlog
+*.lastbuildstate
+
+# Agent scratchpad
+jules-scratch/
