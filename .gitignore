@@ -1,0 +1,19 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# IDE / Editor
+.vscode/
+.idea/
+
+# Dependencies
+venv/
+env/
+.env
+
+# Downloaded files
+downloaded.exe
+*.exe
+test.exe
